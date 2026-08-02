@@ -47,8 +47,7 @@ deferred, or explicitly excluded from the template.
   workflow.
 - Usage: Use through `$git-commit-push-tag` only when explicitly requested.
 - Notes: Repository mutation requires an explicit bump. GitHub Release
-  publication requires a separate explicit parameter and successful automatic
-  package CI before completion.
+  publication requires a separate explicit parameter and produces no assets.
 
 ### `.agents/skills/git-commit-push-tag/SKILL.md`
 
@@ -57,7 +56,7 @@ deferred, or explicitly excluded from the template.
 - Goal: Loads the canonical guarded Git workflow instructions.
 - Usage: Codex loads this file after explicit skill invocation.
 - Notes: The canonical reference is the sole behavioral source of truth,
-  including the mandatory release CI completion gate.
+  including the stable, asset-free GitHub Release contract.
 
 ### `.agents/skills/git-commit-push-tag/agents/`
 
@@ -74,7 +73,7 @@ deferred, or explicitly excluded from the template.
 - Goal: Configures display metadata and explicit-invocation policy for the
   `git-commit-push-tag` skill.
 - Usage: Codex uses this metadata in skill UI and invocation policy handling.
-- Notes: Advertises the CI-gated release flow while
+- Notes: Advertises the guarded asset-free release flow while
   `allow_implicit_invocation` remains `false`.
 
 ### `.agents/skills/git-commit-push-tag/references/`
@@ -90,7 +89,7 @@ deferred, or explicitly excluded from the template.
 - Type: `file`
 - Status: `optional`
 - Goal: Defines canonical bump analysis, commit, tag, atomic push,
-  synchronization, and CI-gated GitHub Release behavior.
+  synchronization, and stable asset-free GitHub Release behavior.
 - Usage: Read completely before the skill takes any action or runs Git.
 - Notes: Preserve this file as the skill's sole behavioral source of truth.
 
@@ -233,21 +232,17 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `optional`
-- Goal: Builds and uploads an enriched release package asset, then promotes a
-  validated prerelease.
-- Usage: Runs when a release is published or manually through workflow
+- Goal: Builds and uploads an enriched release package only on explicit manual
   dispatch.
+- Usage: Run manually only when a maintainer explicitly needs a package for an
+  existing release.
 - Notes: Uses a pinned runner and actions pinned by SHA, disables checkout
-  credential persistence, uses `latest` automatically for release packages,
-  and validates manual release tags and agent-rules references against tracked
-  provenance. The public source lookup requires no GitHub App token. The
-  composed ZIP must pass Markdown and Codespell before the full package and
-  upgrade toolkit are uploaded with the built-in workflow token. A dependent
-  job promotes automatic prereleases only after successful packaging; manual
-  runs never promote releases. Package and toolkit names are derived from the
-  repository being packaged. The checkout-free promotion command receives
-  explicit repository context. Shell validation messages are wrapped for YAML
-  lint readability.
+  credential persistence, and validates release tags and agent-rules
+  references against tracked provenance. The public source lookup requires no
+  GitHub App token. The composed ZIP must pass Markdown and Codespell before it
+  is uploaded with the built-in workflow token. The workflow does not run when
+  a GitHub Release is published and never promotes releases. Shell validation
+  messages are wrapped for YAML lint readability.
 
 ### `.githooks/`
 
@@ -672,13 +667,25 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `optional`
-- Goal: Explains automatic and manual enriched release package generation.
-- Usage: Read before publishing or manually regenerating release package
-  assets.
-- Notes: Covers the rule-freshness gate, prerelease promotion, the mandatory
-  automatic CI gate, generated ZIP contents, local testing, and
-  troubleshooting. Cumulative upgrades preserve this repository-specific
-  guide as initialization-only.
+- Goal: Explains the optional manual enriched-package utility.
+- Usage: Read only when manually generating a package independently from the
+  normal GitHub Release process.
+- Notes: GitHub Releases for this repository are stable and asset-free. The
+  guide covers manual generation, provenance checks, local testing, and
+  troubleshooting. Cumulative upgrades preserve this repository-specific guide
+  as initialization-only.
+
+### `docs/upgrade-toolkit.md`
+
+- Type: `file`
+- Status: `optional`
+- Goal: Explains how to build, review, and apply a cumulative starter-kit
+  upgrade.
+- Usage: Follow the documented `build`, `plan`, and `apply` sequence when
+  aligning a repository derived from an earlier starter-kit release.
+- Notes: This universal guide is managed by cumulative upgrades. An unchanged
+  local copy can be updated, while a customized copy is preserved as a
+  conflict instead of being overwritten.
 
 ### `docs/repository-migration.md`
 

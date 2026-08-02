@@ -9,17 +9,17 @@ is the authoritative source for its behavior and instructions.
 | Skill | Purpose | Path |
 | --- | --- | --- |
 <!-- markdownlint-disable-next-line MD013 -->
-| **Git Commit, Push, Tag, and CI-Gated GitHub Release** | Runs the canonical guarded SemVer analysis, validated commit, tag, atomic push, synchronization checks, and optional template-based, CI-gated GitHub Release workflow. | `.agents/skills/git-commit-push-tag` |
+| **Git Commit, Push, Tag, and GitHub Release** | Runs the canonical guarded SemVer analysis, validated commit, tag, atomic push, synchronization checks, and optional stable, asset-free GitHub Release workflow. | `.agents/skills/git-commit-push-tag` |
 
-## Git Commit, Push, Tag, and CI-Gated GitHub Release
+## Git Commit, Push, Tag, and GitHub Release
 
 - **Slug:** `git-commit-push-tag`
 - **Path:** `.agents/skills/git-commit-push-tag`
 - **Invocation:** `$git-commit-push-tag`
 
 Runs the canonical guarded SemVer analysis, validated commit, tag, atomic push,
-synchronization checks, and optional template-based, CI-gated GitHub Release
-workflow.
+synchronization checks, and optional stable, asset-free, template-based GitHub
+Release workflow.
 
 ### When to use
 
@@ -38,15 +38,15 @@ workflow.
 - Analyze the next SemVer bump before mutation.
 - Perform an explicitly validated commit, tag, atomic push, and synchronization
   checks.
-- Complete a requested, template-based GitHub Release only after its automatic
-  Release package CI succeeds.
+- Create a requested stable GitHub Release from the supplied template without
+  uploading release assets.
 
 ### Usage examples
 
 ```text
 Use $git-commit-push-tag to analyze the next SemVer bump.
 Mutate only with an explicit BUMP, and complete a requested GitHub Release
-only after its automatic Release package CI succeeds.
+as a stable, asset-free publication from the release-notes template.
 ```
 
 ### Contents

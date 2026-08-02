@@ -1,36 +1,36 @@
-# Release Package
+# Manual Release Package Utility
 
 ## Purpose
 
-This repository can publish an enriched release package for people who want to
-start a new project with the Git starter kit and the coding-agent rules already
-included.
+GitHub Releases for `obsidian-tools` are stable, template-based publications
+without custom assets. Publishing a release does not start package generation,
+create an upgrade toolkit, or promote a prerelease.
+
+The inherited package builder and workflow remain available only as optional
+manual maintenance utilities. They are outside the normal release process and
+must not be run unless a maintainer explicitly requests a package for an
+existing release.
 
 The agent rules come from
 [agent-coding-rules](https://github.com/asphyx0r/agent-coding-rules), a
 repository that provides practical behavior and code-quality rules for AI
 coding agents.
 
-GitHub always adds two source archives to each release:
+GitHub provides its standard source archives for each release:
 
 - `Source code (zip)`
 - `Source code (tar.gz)`
 
-Those archives contain only the files that are committed in `git-starter-kit`
-at the release tag.
+Those archives contain only files committed in `obsidian-tools` at the release
+tag. No additional release asset is required by repository policy.
 
-The release package workflow adds two downloadable files to a
-`git-starter-kit` release. The enriched ZIP contains the canonical rule files
-already tracked at the release tag, and the upgrade toolkit packages the
-guarded cumulative updater.
+## Optional Generated File
 
-## Generated File
-
-The generated assets are named like this:
+An explicitly requested manual run creates one enriched package named like
+this:
 
 ```text
-git-starter-kit-vX.Y.Z-with-agent-rules.zip
-git-starter-kit-vX.Y.Z-upgrade-toolkit.zip
+obsidian-tools-vX.Y.Z-with-agent-rules.zip
 ```
 
 The ZIP includes the normal starter kit files plus these files from
@@ -50,12 +50,12 @@ The ZIP also includes two provenance files:
 - `_starter-kit-files.json` records each managed path, raw and canonical
   SHA-256 digests, content kind, Git mode, and upgrade strategy.
 
-The upgrade toolkit contains the guarded updater and the complete enriched
-package. It can build a cumulative upgrade from the exact earlier package used
-to initialize a target repository. Only `git-starter-kit` publishes this
-toolkit. When the release workflow is inherited by a downstream repository,
-the repository publishes its own enriched package but skips the starter
-upgrade toolkit.
+This downstream repository never builds or uploads a starter-kit upgrade
+toolkit. The cumulative updater remains available locally for repository
+maintenance but is not a release asset.
+
+For a concise usage procedure in French, see
+[Upgrade toolkit](upgrade-toolkit.md).
 
 The cumulative updater classifies the six rule files and
 `_agent-rules-source.json` as `agent-rules`. It reports those paths but never
@@ -83,73 +83,21 @@ when provenance schema 3 contains its matching `preservedFiles` record.
 No source-repository GitHub App token is required. The built-in workflow token
 is used only to upload assets to the current repository release.
 
-## Automatic Release Mode
-
-Use this mode for the normal release process.
-
-1. Prepare the release commit in `git-starter-kit`.
-2. From a clean repository, run `bash tools/repository-audit.sh` locally.
-3. Stop if the local audit fails; do not create a release tag or release.
-4. Create and push the release tag, for example `v1.3.0`.
-5. On GitHub, open the repository page.
-6. Open **Releases**.
-7. Create a new release from the tag.
-8. Mark it as a prerelease and do not mark it as latest.
-9. Publish the prerelease.
-
-After the prerelease is published, GitHub starts the `Release package`
-workflow automatically. Automatic releases intentionally use `latest` so the
-package always includes the latest published full `agent-coding-rules`
-release.
-
-The workflow then:
-
-1. Checks out `git-starter-kit` at the published release tag.
-2. Resolves `latest` to the latest published full `agent-coding-rules` release.
-3. Verifies that tracked provenance and rule hashes match the resolved tag.
-4. Copies the tracked starter-kit files into a temporary package folder.
-5. Retains the six tracked rule files in that package folder.
-6. Writes validated provenance and the managed-file manifest.
-7. Creates the ZIP file.
-8. Verifies that the required files and managed-file hashes are present.
-9. Extracts the composed package and runs its Markdown and Codespell audits.
-10. Bundles the guarded updater and complete package as an upgrade toolkit.
-11. Uploads both ZIP files to the GitHub release as release assets.
-12. Promotes the prerelease to the latest stable release in a separate job
-    that depends on successful packaging.
-
-The release is complete only when this exact `release.published` workflow run
-finishes with `success`, the release is no longer a prerelease, and both
-expected assets and their provenance have been verified. A manual workflow run
-does not satisfy this completion gate.
-
-When the workflow finishes, the GitHub release should show an asset such as:
-
-```text
-git-starter-kit-v1.3.0-with-agent-rules.zip
-git-starter-kit-v1.3.0-upgrade-toolkit.zip
-```
-
-Download this ZIP when you want a ready-to-use starter kit with agent rules
-already included.
-
 ## Manual Release Mode
 
-Use this mode when you need to create or recreate the enriched package for an
-existing release.
+Use this exceptional mode only after a maintainer explicitly requests an
+enriched package for an existing release. It is not part of release completion.
 
 The release must already exist on GitHub before running the workflow manually.
 The `tag` input must be an existing GitHub release tag that uses SemVer with a
 leading `v`, for example `v1.3.0`. The manual workflow uploads an asset to
 that release; it does not create the release itself.
 
-Manual runs never promote a prerelease. If an automatic release run failed,
-rerun the failed jobs of that same `release` run after correcting the cause.
-Do not substitute a `workflow_dispatch` run for the automatic completion gate.
+Manual runs never create, promote, or otherwise edit a GitHub Release.
 
-1. Open the `git-starter-kit` repository on GitHub.
+1. Open the `obsidian-tools` repository on GitHub.
 2. Open the **Actions** tab.
-3. Select the **Release package** workflow.
+3. Select the **Manual release package** workflow.
 4. Click **Run workflow**.
 5. Fill in `tag` with the release tag to package, for example `v1.3.0`.
 6. Fill `agent_rules_ref` with `latest` or a SemVer `agent-coding-rules` tag,
@@ -160,8 +108,8 @@ Manual release packages accept `latest` or an explicit SemVer tag. Use a SemVer
 tag when you need to recreate a package from a known agent-rules release.
 Branch names are still rejected so the generated asset stays reproducible.
 
-When the workflow finishes, open the GitHub release page for the tag and check
-that the ZIP asset is listed under the release assets.
+When the workflow finishes, verify the package only when it was explicitly
+requested. Normal `obsidian-tools` releases must remain asset-free.
 
 ## Local Test
 
@@ -208,18 +156,11 @@ should be built from committed repository content.
 
 ## Troubleshooting
 
-If the release asset is missing, open the **Actions** tab and inspect the latest
-`Release package` workflow run.
-
-If a release remains a prerelease, inspect the matching run triggered by the
-`release` event. The run must match the release tag and tag commit and must end
-with `success` before the release is complete.
+An asset-free GitHub Release is the expected result. Do not run the manual
+workflow merely because no custom asset is present.
 
 If the manual workflow fails, check that the `tag` input matches an existing
 GitHub release tag using SemVer with a leading `v`.
-
-If only the promotion job fails, rerun only the failed jobs of the same
-automatic run. Do not delete a valid asset or start a manual replacement run.
 
 If the package must use a specific agent rules version, run the manual
 workflow again with an explicit SemVer `agent_rules_ref` value.

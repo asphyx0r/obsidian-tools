@@ -170,12 +170,13 @@ options:
 
 ### Description
 
-`build-release-package.ps1` creates the release asset used by the
-`Release package` GitHub Actions workflow. It packages files reported by
-`git ls-files`, including the required coding-agent rule files already tracked
-by the repository. It resolves an `agent-coding-rules` release only to assert
-that provenance and canonical rule hashes are current. The generated ZIP
-includes the normal repository content, the required rule files,
+`build-release-package.ps1` creates an optional enriched package for explicit
+manual maintenance requests. Normal `obsidian-tools` GitHub Releases do not
+use this package and contain no custom assets. The script packages files
+reported by `git ls-files`, including the required coding-agent rule files
+already tracked by the repository. It resolves an `agent-coding-rules` release
+only to assert that provenance and canonical rule hashes are current. The
+generated ZIP includes the normal repository content, the required rule files,
 `_agent-rules-source.json`, and the per-file `_starter-kit-files.json` upgrade
 manifest.
 When a downstream repository already tracks an earlier managed-file manifest,
@@ -257,11 +258,11 @@ tar -xOf .tmp\release-package-test\test-release-package.zip `
 
 ### Appendix
 
-Use this script from a clean, committed repository when preparing release
-assets. Local untracked files are intentionally excluded because package
-content comes from `git ls-files`.
+Use this script from a clean, committed repository only when a package was
+explicitly requested. Local untracked files are intentionally excluded because
+package content comes from `git ls-files`.
 
-Use `latest` for normal release automation so packaging fails if tracked rules
+Use `latest` for a normal manual package so generation fails if tracked rules
 lag behind the latest full `agent-coding-rules` release. Use an explicit SemVer
 tag only when recreating a package from a known rules release.
 
