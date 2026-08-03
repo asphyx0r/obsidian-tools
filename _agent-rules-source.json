@@ -1,24 +1,21 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-31T13:15:43.1623229Z",
   "repository": {
     "name": "git-starter-kit",
     "slug": "asphyx0r/git-starter-kit",
-    "ref": "v2.3.0",
-    "commit": "1e882e0dfd949af7d27065ea3ec31ddbdd9f3715"
+    "ref": "v2.4.0",
+    "commit": "f7e042f457dbb78ff251eb59f3b74d8597a62729"
   },
   "starterKit": {
     "repository": "https://github.com/asphyx0r/git-starter-kit",
-    "ref": "v2.3.0",
-    "commit": "1e882e0dfd949af7d27065ea3ec31ddbdd9f3715"
+    "ref": "v2.4.0",
+    "commit": "f7e042f457dbb78ff251eb59f3b74d8597a62729"
   },
   "agentRules": {
     "repository": "https://github.com/asphyx0r/agent-coding-rules",
-    "requestedRef": "latest",
+    "requestedRef": "v1.41.1",
     "ref": "v1.41.1",
     "commit": "88731bf279cc77fb8aaf2499901b38ecf6c3a159",
-    "releaseUrl": "https://github.com/asphyx0r/agent-coding-rules/releases/tag/v1.41.1",
-    "releaseDate": "07/31/2026 12:52:48",
     "files": [
       "AGENTS.md",
       "CODING_RULES.md",

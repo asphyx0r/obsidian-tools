@@ -43,8 +43,8 @@ deferred, or explicitly excluded from the template.
 
 - Type: `directory`
 - Status: `optional`
-- Goal: Provides the canonical guarded SemVer analysis and publication
-  workflow.
+- Goal: Provides the canonical guarded SemVer analysis, remote audit preflight,
+  and publication workflow.
 - Usage: Use through `$git-commit-push-tag` only when explicitly requested.
 - Notes: Repository mutation requires an explicit bump. GitHub Release
   publication requires a separate explicit parameter and produces no assets.
@@ -56,7 +56,8 @@ deferred, or explicitly excluded from the template.
 - Goal: Loads the canonical guarded Git workflow instructions.
 - Usage: Codex loads this file after explicit skill invocation.
 - Notes: The canonical reference is the sole behavioral source of truth,
-  including the stable, asset-free GitHub Release contract.
+  including exact-file commit validation, remote audit checks, and the stable,
+  asset-free GitHub Release contract.
 
 ### `.agents/skills/git-commit-push-tag/agents/`
 
@@ -73,7 +74,7 @@ deferred, or explicitly excluded from the template.
 - Goal: Configures display metadata and explicit-invocation policy for the
   `git-commit-push-tag` skill.
 - Usage: Codex uses this metadata in skill UI and invocation policy handling.
-- Notes: Advertises the guarded asset-free release flow while
+- Notes: Advertises the guarded audit-preflight and asset-free release flow while
   `allow_implicit_invocation` remains `false`.
 
 ### `.agents/skills/git-commit-push-tag/references/`
@@ -88,19 +89,20 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `optional`
-- Goal: Defines canonical bump analysis, commit, tag, atomic push,
-  synchronization, and stable asset-free GitHub Release behavior.
+- Goal: Defines canonical bump analysis, exact commit validation, remote audit
+  preflight, tag, atomic push, synchronization, and stable asset-free GitHub
+  Release behavior.
 - Usage: Read completely before the skill takes any action or runs Git.
 - Notes: Preserve this file as the skill's sole behavioral source of truth.
 
 ### `.betterleaks.toml`
 
 - Type: `file`
-- Status: `duplicate`
-- Goal: Would define Betterleaks-specific secret scanning rules.
-- Usage: Not included; Betterleaks can read the shared `.gitleaks.toml` path
-  if secret scanning later needs configuration.
-- Notes: Keep one scanner configuration owner to avoid drift.
+- Status: `required`
+- Goal: Defines the reviewed secret-scanner rules used by Betterleaks.
+- Usage: Betterleaks loads this file automatically from the repository root.
+- Notes: Kept byte-identical to `.gitleaks.toml` so both scanners validate the
+  same placeholder fixtures and exclusions.
 
 ### `.codespellrc`
 
@@ -132,13 +134,11 @@ deferred, or explicitly excluded from the template.
 ### `.gitleaks.toml`
 
 - Type: `file`
-- Status: `deferred`
-- Goal: Would define shared secret scanning rules for Gitleaks-compatible
-  tools.
-- Usage: Not included; default Gitleaks and Betterleaks scans currently pass
-  without repository-specific configuration.
-- Notes: Add only with an approved secret scanning audit gate and only if
-  default rules need stable generic overrides or allowlists.
+- Status: `required`
+- Goal: Defines the reviewed secret-scanner rules used by Gitleaks.
+- Usage: Gitleaks loads this file automatically from the repository root.
+- Notes: Kept byte-identical to `.betterleaks.toml` and validated against both
+  accepted placeholder and rejected secret fixtures.
 
 ### `.github/`
 
@@ -201,13 +201,16 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `optional`
-- Goal: Runs a minimal repository documentation audit on GitHub Actions.
-- Usage: Executes on pushes, pull requests, and manual dispatch.
+- Goal: Runs the repository audit jobs and publishes one stable aggregate
+  check.
+- Usage: Executes on pushes, pull requests, published releases, and manual
+  dispatch.
 - Notes: The workflow uses a pinned runner and a checkout action pinned by
   SHA for `actions/checkout@v7.0.0`. It delegates Markdown, spelling,
   static, smoke, and configuration rules to `tools/repository-audit.sh` so
   local and CI audits share the same
-  source of truth. Tool downloads are version-pinned but not hash-verified;
+  source of truth. The aggregate `Repository audit` job fails unless every
+  child job succeeds. Tool downloads are version-pinned but not hash-verified;
   this is an accepted lightweight CI tradeoff for a generic starter kit with
   read-only repository audit permissions, disabled checkout credential
   persistence, and without forwarding the workflow token to checked-out audit
@@ -219,30 +222,15 @@ deferred, or explicitly excluded from the template.
 - Status: `required`
 - Goal: Keeps each initialized repository aligned with the latest canonical
   agent-rule release without a central repository registry.
-- Usage: Runs daily or by manual dispatch and opens a repository-local pull
-  request when the six rule files change.
+- Usage: Runs daily, on every published release, or by manual dispatch and
+  opens a repository-local pull request when the six rule files change.
 - Notes: Uses the synchronization tool from the resolved
   `agent-coding-rules` release and one target-repository GitHub App token. It
   restricts changes to the six rules and provenance, preserves customized rule
   files, and runs in the starter kit as well as downstream repositories. Set
-  `AGENT_RULES_SYNC_ENABLED=false` to suspend the job. Cumulative upgrades
-  replace this universal workflow.
-
-### `.github/workflows/release-package.yml`
-
-- Type: `file`
-- Status: `optional`
-- Goal: Builds and uploads an enriched release package only on explicit manual
-  dispatch.
-- Usage: Run manually only when a maintainer explicitly needs a package for an
-  existing release.
-- Notes: Uses a pinned runner and actions pinned by SHA, disables checkout
-  credential persistence, and validates release tags and agent-rules
-  references against tracked provenance. The public source lookup requires no
-  GitHub App token. The composed ZIP must pass Markdown and Codespell before it
-  is uploaded with the built-in workflow token. The workflow does not run when
-  a GitHub Release is published and never promotes releases. Shell validation
-  messages are wrapped for YAML lint readability.
+  `AGENT_RULES_SYNC_ENABLED=false` to suspend scheduled and manual runs;
+  published releases always run the job. Cumulative upgrades replace this
+  universal workflow.
 
 ### `.githooks/`
 
@@ -348,6 +336,16 @@ deferred, or explicitly excluded from the template.
 - Notes: Stores raw and canonical SHA-256 digests, content kinds, Git modes,
   and `agent-rules`, `replace`, `merge`, or `initialize-only` strategies. The
   manifest does not include its own digest.
+
+### `starter-kit-manifest.json`
+
+- Type: `file`
+- Status: `required`
+- Goal: Records the immutable starter-kit source and the currently adopted
+  cumulative release.
+- Usage: Updated by the guarded upgrade tool and reviewed during core audits.
+- Notes: Preserves `source` while updating `current` and the managed core file
+  inventory.
 
 ### `AGENTS.md`
 
@@ -488,25 +486,6 @@ deferred, or explicitly excluded from the template.
   transactional and does not preserve every NTFS metadata class or add a
   cryptographic manifest.
 
-### `tools/build-release-package.ps1`
-
-- Type: `file`
-- Status: `optional`
-- Goal: Generates a starter-kit release package enriched with agent rules.
-- Usage: Run from the release package workflow or manually with PowerShell.
-- Notes: Copies tracked repository files, resolves `latest` through the public
-  GitHub release API by default, and verifies tracked rule hashes and
-  provenance against that release. It writes repository provenance plus
-  per-file raw and canonical SHA-256 hashes, content kinds, modes, and upgrade
-  strategies for every tracked file, including dotfiles, validates package
-  file names before writing ZIP files, keeps SemVer validation aligned with CI
-  smoke cases, and verifies exhaustive manifest coverage and repository-owned
-  documentation strategies in the archive. Agent-rule paths use an independent
-  strategy so cumulative starter upgrades cannot overwrite them. A previously
-  tracked managed-file manifest is excluded before its replacement is
-  generated, so aligned downstream repositories remain packageable. Helper
-  functions use ScriptAnalyzer-compatible names and explicit parameters.
-
 ### `tools/README.md`
 
 - Type: `file`
@@ -517,10 +496,9 @@ deferred, or explicitly excluded from the template.
   command-line interfaces, examples, exit status, and best practices.
 - Notes: Keep entries aligned with current tool behavior whenever scripts are
   changed. Documents execution-policy troubleshooting for downloaded
-  `git-init.ps1` copies that PowerShell blocks before launch, and records the
-  backup and cumulative upgrade tools' provenance, consistency, and
-  restoration limits. Cumulative upgrades treat this repository-specific
-  operator reference as initialization-only.
+  `git-init.ps1` copies and the exact remote-audit verifier contract.
+  Cumulative upgrades treat this repository-specific operator reference as
+  initialization-only.
 
 ### `tools/repository-audit.sh`
 
@@ -530,40 +508,22 @@ deferred, or explicitly excluded from the template.
 - Usage: Run `bash tools/repository-audit.sh` locally before creating a
   release tag or GitHub release. GitHub Actions invokes the same script with
   mode-specific `markdown`, `spelling`, and `static` arguments.
-- Notes: Static and read-only modes validate `tools/git-init.sh` with
-  ShellCheck and Shfmt using two-space indentation. Cumulative upgrades treat
-  this repository-specific audit as initialization-only.
-- Notes: Defaults to the full profile, with `full` as an explicit alias. Full
-  profiles own Markdown lint, spelling, Git whitespace, Bash syntax, ShellCheck
-  for shell scripts and Git hooks, PowerShell parsing, cross-language SemVer
-  pattern drift checks, Python backup and upgrade tests, smoke behavior,
-  release package manifests, commitlint configuration, and commit message
-  checks for newly introduced commits. The optional
-  `readonly` profile uses installed tools, disables optional Git locks, avoids
-  network access, temporary files, package installation, and mutating smoke
-  tests, and also checks YAML, workflows, and secrets. Full profiles
-  intentionally resolve the latest
-  published `agent-coding-rules` release during release package smoke checks,
-  bootstraps pinned Codespell in a temporary Python target, handles WSL-aware
-  PowerShell command, path, and temporary directory compatibility through the
-  ignored `.tmp/` path when needed, uses
-  version-pinned package downloads without hash verification, documents the
-  npm, PyPI, and GitHub network requirements, and fails when required local
-  tools are unavailable instead of silently skipping CI rules.
+- Notes: Static and read-only modes validate Git whitespace, hooks, Bash,
+  PowerShell, workflows, commit messages, repository tests, and secret-scanner
+  behavior. Release events audit the relevant reachable history and publish a
+  stable aggregate check. Starter-kit-only package checks remain conditional
+  and are inactive in this downstream repository.
 
-### `tools/starter-kit-upgrade.py`
+### `tools/verify-repository-audit-runs.py`
 
 - Type: `file`
-- Status: `optional`
-- Goal: Builds, inspects, and applies cumulative starter-kit upgrade packages.
-- Usage: Build from exact base and new full packages, inspect with `plan`, and
-  use `apply` only with an external backup directory.
-- Notes: Validates ZIP paths, semantic starter provenance, raw and canonical
-  per-file SHA-256 hashes, tracked worktree cleanliness, and conflicts. It
-  delegates agent-rule paths, three-way merges designated text files,
-  flags changed initialization-only files for local review, preserves locally
-  owned and unrelated untracked files, performs no deletion or Git
-  publication, and restores writes after a failed application attempt.
+- Status: `required`
+- Goal: Waits for the exact successful push-triggered repository audit runs
+  required by a guarded release.
+- Usage: Provide the repository, workflow ID, exact SHA, expected refs, and UTC
+  lower bound; use `--dry-run` to preview the read-only query.
+- Notes: Rejects failed or ambiguous runs and never treats a manual dispatch as
+  a substitute for the required push event.
 
 ### `tools/git-init.ps1`
 
@@ -624,16 +584,23 @@ deferred, or explicitly excluded from the template.
   and symbolic-link cases skip only when the required platform capability is
   unavailable.
 
-### `tests/test_starter_kit_upgrade.py`
+### `tests/test_commit_message_validation.sh`
 
 - Type: `file`
-- Status: `optional`
-- Goal: Verifies cumulative package construction, three-state planning,
-  provenance gates, conflict handling, rollback, and archive path safety.
-- Usage: Run
-  `python -B -m unittest discover -s tests -p "test_starter_kit_upgrade.py"`.
-- Notes: Uses temporary Git repositories and ZIP files without changing the
-  working repository.
+- Status: `required`
+- Goal: Verifies audit-range selection and exact-file Commitlint enforcement.
+- Usage: Run `bash tests/test_commit_message_validation.sh`.
+- Notes: Uses isolated temporary Git repositories and leaves the worktree
+  unchanged.
+
+### `tests/test_verify_repository_audit_runs.py`
+
+- Type: `file`
+- Status: `required`
+- Goal: Verifies exact workflow-run selection, pagination, failures, and CLI
+  validation for the remote audit verifier.
+- Usage: Run `python -B -m unittest tests.test_verify_repository_audit_runs`.
+- Notes: Mocks GitHub API responses and performs no network mutation.
 
 ### `docs/`
 
@@ -662,30 +629,6 @@ deferred, or explicitly excluded from the template.
 - Usage: Update whenever repository files or directories are added or changed.
 - Notes: This file is the source of truth for repository file ownership.
   Cumulative upgrades preserve it as initialization-only.
-
-### `docs/release-package.md`
-
-- Type: `file`
-- Status: `optional`
-- Goal: Explains the optional manual enriched-package utility.
-- Usage: Read only when manually generating a package independently from the
-  normal GitHub Release process.
-- Notes: GitHub Releases for this repository are stable and asset-free. The
-  guide covers manual generation, provenance checks, local testing, and
-  troubleshooting. Cumulative upgrades preserve this repository-specific guide
-  as initialization-only.
-
-### `docs/upgrade-toolkit.md`
-
-- Type: `file`
-- Status: `optional`
-- Goal: Explains how to build, review, and apply a cumulative starter-kit
-  upgrade.
-- Usage: Follow the documented `build`, `plan`, and `apply` sequence when
-  aligning a repository derived from an earlier starter-kit release.
-- Notes: This universal guide is managed by cumulative upgrades. An unchanged
-  local copy can be updated, while a customized copy is preserved as a
-  conflict instead of being overwritten.
 
 ### `docs/repository-migration.md`
 
