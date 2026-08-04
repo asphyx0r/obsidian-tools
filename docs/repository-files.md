@@ -2,21 +2,22 @@
 
 ## Purpose
 
-This document lists the files and directories that belong to this repository
-template.
+This document lists the files and directories that belong to the
+`obsidian-tools` repository.
 
 ## Scope
 
-This inventory covers repository-level files and directories that are included,
-deferred, or explicitly excluded from the template.
+This inventory covers repository-level files and directories that are required,
+optional, deferred, or explicitly excluded from this repository.
 
 ## Status definitions
 
-- `required`: included in the base template.
-- `optional`: included in the template, but safe to remove or adapt in
-  downstream projects.
+- `required`: needed for the repository's functionality, governance, or
+  documented maintenance workflows.
+- `optional`: retained for a supported repository capability, but safe to
+  remove or adapt when that capability is not needed.
 - `deferred`: intentionally postponed until a concrete need is confirmed.
-- `rejected`: intentionally excluded from the template.
+- `rejected`: intentionally excluded from this repository.
 - `duplicate`: excluded because another path owns the same responsibility.
 
 ## File and directory records
@@ -118,7 +119,7 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `required`
-- Goal: Defines editor-level formatting defaults for a polyglot template.
+- Goal: Defines editor-level formatting defaults for this polyglot repository.
 - Usage: Editors and IDEs that support EditorConfig apply these settings.
 - Notes: Keep rules language-family oriented rather than framework-specific,
   with a dedicated Git config rule for tab-indented config templates.
@@ -177,7 +178,7 @@ deferred, or explicitly excluded from the template.
 - Type: `file`
 - Status: `optional`
 - Goal: Guides issue authors through proposed repository improvements.
-- Usage: Use for reusable starter-kit improvements or template additions.
+- Usage: Use for concrete `obsidian-tools` improvements or template additions.
 - Notes: Keep proposals scoped and tied to a concrete need.
 
 ### `.github/PULL_REQUEST_TEMPLATE.md`
@@ -193,7 +194,8 @@ deferred, or explicitly excluded from the template.
 - Type: `directory`
 - Status: `optional`
 - Goal: Stores GitHub Actions workflows for repository-level automation.
-- Usage: Keep only lightweight, generic workflows in this directory.
+- Usage: Keep workflows aligned with concrete repository validation and
+  maintenance needs.
 - Notes: Avoid adding application build, test, deploy, or release pipelines
   unless a concrete project need is approved.
 
@@ -211,7 +213,7 @@ deferred, or explicitly excluded from the template.
   local and CI audits share the same
   source of truth. The aggregate `Repository audit` job fails unless every
   child job succeeds. Tool downloads are version-pinned but not hash-verified;
-  this is an accepted lightweight CI tradeoff for a generic starter kit with
+  this is an accepted lightweight CI tradeoff for this repository with
   read-only repository audit permissions, disabled checkout credential
   persistence, and without forwarding the workflow token to checked-out audit
   code.
@@ -297,13 +299,13 @@ deferred, or explicitly excluded from the template.
 - Status: `optional`
 - Goal: Stores Visual Studio Code workspace recommendations.
 - Usage: VS Code reads supported workspace files from this directory.
-- Notes: Keep only generic recommendations that fit the starter kit.
+- Notes: Keep only recommendations that fit this repository.
 
 ### `.vscode/extensions.json`
 
 - Type: `file`
 - Status: `optional`
-- Goal: Recommends VS Code extensions useful for this starter kit.
+- Goal: Recommends VS Code extensions useful for this repository.
 - Usage: VS Code suggests these extensions when the repository is opened.
 - Notes: Keep recommendations generic and avoid personal preferences.
 
@@ -311,7 +313,7 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `optional`
-- Goal: Defines shared VS Code workspace defaults for this starter kit.
+- Goal: Defines shared VS Code workspace defaults for this repository.
 - Usage: VS Code applies these settings when the repository is opened.
 - Notes: Keep settings aligned with `.editorconfig` and generic editor
   recommendations. Format-on-save settings are human VS Code defaults only;
@@ -336,6 +338,17 @@ deferred, or explicitly excluded from the template.
 - Notes: Stores raw and canonical SHA-256 digests, content kinds, Git modes,
   and `agent-rules`, `replace`, `merge`, or `initialize-only` strategies. The
   manifest does not include its own digest.
+
+### `.starter-kit-adoption.json`
+
+- Type: `file`
+- Status: `required`
+- Goal: Records the verified starter-kit package adopted by this repository.
+- Usage: Read by cumulative upgrade tooling to validate provenance before
+  planning or applying a later core release.
+- Notes: Schema 2 records the base archive SHA-256, adopted ref and commit,
+  repository baseline commit, accepted local files, and original starter-kit
+  source.
 
 ### `starter-kit-manifest.json`
 
@@ -423,9 +436,10 @@ deferred, or explicitly excluded from the template.
 - Type: `file`
 - Status: `required`
 - Goal: Explains how contributors should propose and verify changes.
-- Usage: Read before contributing to the starter kit.
-- Notes: Documents optional Git hook activation and scoped commit message
-  validation. Future-project placeholders belong in `templates/CONTRIBUTING.md`.
+- Usage: Read before contributing to this repository.
+- Notes: Currently retains starter-kit-oriented contribution wording and must
+  be adapted only through a separate approved documentation change. It also
+  documents optional Git hook activation and scoped commit validation.
 
 ### `LICENSE`
 
@@ -439,21 +453,22 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `required`
-- Goal: Introduces the repository purpose, features, setup, and license.
-- Usage: Read first when evaluating or reusing the starter kit.
-- Notes: Summarizes audit prerequisites, optional Git hook activation,
-  release package behavior, the canonical skill invocation contract, generic
-  ignore coverage, and the maintainer migration record. Do not leave
-  future-project placeholders in the root README.
+- Goal: Introduces the Obsidian vault-structure CLI, requirements, usage, and
+  license.
+- Usage: Read before running the project script against an Obsidian vault.
+- Notes: Documents Python 3.10 or later, the absence of third-party packages,
+  platform-specific default roots, `--dry-run`, the created directory tree,
+  contribution policy, and MIT licensing.
 
 ### `SECURITY.md`
 
 - Type: `file`
 - Status: `required`
 - Goal: Explains how to report security issues for this repository.
-- Usage: Use for suspected vulnerabilities in the starter kit itself.
-- Notes: Requires GitHub private vulnerability reporting to remain enabled
-  instead of inventing maintainer email addresses or response timelines.
+- Usage: Review before reporting a suspected repository vulnerability.
+- Notes: Currently retains the starter-kit reporting URL and scope; treat it
+  as inherited core content until a separately approved project-specific
+  update is completed.
 
 ### `SUPPORT.md`
 
@@ -462,6 +477,27 @@ deferred, or explicitly excluded from the template.
 - Goal: Explains where users can get help for this repository.
 - Usage: Read before opening support questions or asking for help.
 - Notes: Keep support scope distinct from security reporting.
+
+### `scripts/`
+
+- Type: `directory`
+- Status: `required`
+- Goal: Stores user-facing scripts that implement `obsidian-tools` behavior.
+- Usage: Keep project functionality here, separate from generic repository
+  maintenance tools under `tools/`.
+- Notes: The directory currently contains the Obsidian vault-structure
+  initializer.
+
+### `scripts/initialize-obsidian-vault-structure.py`
+
+- Type: `file`
+- Status: `required`
+- Goal: Creates the standard directory structure for an Obsidian vault.
+- Usage: Run with `--root` to select a vault, use `--dry-run` to preview all
+  changes, and use `--help` or `--version` for CLI information.
+- Notes: Requires Python 3.10 or later and no third-party package. Existing
+  directories are preserved, repeated execution is safe, and omitted roots
+  use the documented platform-specific defaults.
 
 ### `tools/`
 
@@ -607,7 +643,7 @@ deferred, or explicitly excluded from the template.
 - Type: `directory`
 - Status: `required`
 - Goal: Stores repository documentation.
-- Usage: Keep maintained documentation that supports the starter kit here.
+- Usage: Keep maintained documentation that supports `obsidian-tools` here.
 - Notes: Avoid duplicating root-level community files.
 
 ### `docs/SKILLS.md`
@@ -634,10 +670,13 @@ deferred, or explicitly excluded from the template.
 
 - Type: `file`
 - Status: `required`
-- Goal: Records the verified migration of the canonical maintainer worktree.
-- Usage: Consult before selecting a local worktree for future repository work.
-- Notes: Documents the reason, validation evidence, operating decision, and
-  safeguards without changing reusable starter-kit behavior.
+- Goal: Retains the core repository migration record inherited from the
+  starter kit.
+- Usage: Use as a provenance reference only; it does not identify the current
+  `obsidian-tools` worktree.
+- Notes: Its paths and refs describe `git-starter-kit` and must not guide
+  operations in this repository. Any adaptation or removal requires a separate
+  approved documentation change.
 
 ### `templates/`
 
