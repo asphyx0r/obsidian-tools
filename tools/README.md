@@ -83,6 +83,48 @@ powershell -NoProfile -File tools/git-init.ps1 --help
 The tools stop before creating Git metadata when validation or confirmation
 fails. They never bypass Commitlint or the repository hooks.
 
+## `release-artifacts.py`
+
+Prepares and validates the three root files that identify an exact future
+release: `VERSION`, `SHA256SUMS`, and `manifest.json`.
+
+The tool reads Git blobs from `HEAD`, the index, or a selected tree. It ignores
+untracked, ignored, and absent files, generates the manifest from
+`templates/release/manifest.template.json`, and validates it against
+`templates/release/manifest.schema.json`.
+
+Install the pinned validator before running the tool:
+
+```bash
+python -m pip install \
+  --requirement tools/release-artifacts-requirements.txt
+```
+
+Preview artifact preparation with one explicit metadata file outside the
+repository:
+
+```bash
+python tools/release-artifacts.py --dry-run prepare \
+  --release-ref v1.2.3 \
+  --release-date 2026-08-18T12:00:00Z \
+  --metadata-file /external/path/release-metadata.json
+```
+
+The metadata file must supply every release-specific value. The tool never
+infers unknown business metadata. Generate only after the preview succeeds,
+then validate the staged files with:
+
+```bash
+python tools/release-artifacts.py check \
+  --expected-ref v1.2.3 \
+  --index
+```
+
+Validate an immutable release tag by replacing `--index` with
+`--treeish v1.2.3`. The checksum inventory includes supported Git blobs and
+`VERSION`, but excludes the self-referential `SHA256SUMS` and
+`manifest.json` outputs.
+
 ## `repository-audit.sh`
 
 Runs the same repository validation profiles used by GitHub Actions.
@@ -104,13 +146,15 @@ bash tools/repository-audit.sh [all|full|readonly|markdown|spelling|static]
   commit-message validation.
 
 The script validates release-aware commit ranges, the release triggers of the
-agent-rules and repository-audit workflows, and the stable aggregate audit
-job. Starter-kit-only package checks remain conditional on their files and do
-not run in this downstream repository.
+agent-rules and repository-audit workflows, the release-artifact contract, and
+the stable aggregate audit job. Starter-kit-only package checks remain
+conditional on their files and do not run in this downstream repository.
 
-The `static` profile creates isolated temporary fixtures and may resolve pinned
-Node packages. The `readonly` profile requires all commands to be installed and
-fails explicitly when a required tool is unavailable.
+The `static` profile creates isolated temporary fixtures, installs the pinned
+release-manifest validator, runs the release-artifact tests and hook smoke test,
+and may resolve pinned Node packages. The `readonly` profile requires all
+commands to be installed and fails explicitly when a required tool is
+unavailable.
 
 ## `verify-repository-audit-runs.py`
 
