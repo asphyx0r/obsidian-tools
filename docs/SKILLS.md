@@ -9,7 +9,7 @@ is the authoritative source for its behavior and instructions.
 | Skill | Purpose | Path |
 | --- | --- | --- |
 <!-- markdownlint-disable-next-line MD013 -->
-| **Git Commit, Push, Tag, and GitHub Release** | Runs guarded SemVer analysis, exact commit validation, audit preflight, tag, atomic final push, and an optional stable, asset-free GitHub Release. | `.agents/skills/git-commit-push-tag` |
+| **Git Commit, Push, Tag, and GitHub Release** | Runs guarded SemVer analysis, release-artifact preparation, audit preflight, tag, atomic final push, and an optional stable, asset-free GitHub Release. | `.agents/skills/git-commit-push-tag` |
 
 ## Git Commit, Push, Tag, and GitHub Release
 
@@ -18,8 +18,10 @@ is the authoritative source for its behavior and instructions.
 - **Invocation:** `$git-commit-push-tag`
 
 Runs the canonical guarded SemVer analysis, exact-file commit validation,
-remote SHA preflight, tag, atomic final push, synchronization checks, and an
-optional stable, asset-free, template-based GitHub Release workflow.
+explicit release-metadata collection, deterministic release-artifact
+preparation, remote SHA preflight, tag, atomic final push, synchronization
+checks, and an optional stable, asset-free, template-based GitHub Release
+workflow.
 
 ### When to use
 
@@ -37,6 +39,8 @@ optional stable, asset-free, template-based GitHub Release workflow.
 
 - Analyze the next SemVer bump before mutation.
 - Commit the exact file accepted by Commitlint through the repository hooks.
+- Generate and validate `VERSION`, `SHA256SUMS`, and `manifest.json` without
+  inferring unknown release metadata.
 - Prevalidate the release SHA, then require every expected branch and tag audit
   run around the atomic final push.
 - Create a requested stable GitHub Release from the supplied template without
