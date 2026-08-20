@@ -43,8 +43,11 @@ workflow.
   inferring unknown release metadata.
 - Prevalidate the release SHA, then require every expected branch and tag audit
   run around the atomic final push.
+- Prevalidate release workflows and required GitHub App configuration before
+  mutation when a GitHub Release is requested.
 - Create a requested stable GitHub Release from the supplied template without
-  uploading release assets after every required audit succeeds.
+  assets only after the exact `Agent rules update` and `Repository audit`
+  release runs, plus every applicable repository-specific run, succeed.
 
 ### Usage examples
 
@@ -72,10 +75,17 @@ asset-free GitHub Release only after every required audit succeeds.
 - `.agents/skills/git-commit-push-tag/references/git-commit-push-tag.txt` must
   be readable in full before the skill takes any action or runs any Git
   command.
+- The repository must retain active `Repository audit`, `Release artifacts`,
+  and `Agent rules update` workflows. A requested GitHub Release additionally
+  requires the repository variable `AGENT_RULES_APP_CLIENT_ID` and the
+  repository secret `AGENT_RULES_APP_PRIVATE_KEY`.
 
 ### Limitations
 
 - The canonical reference is the sole behavioral source of truth and must be
   followed exactly.
+- The preflight can verify that the GitHub App secret exists, but only the
+  mandatory `Agent rules update` release run proves that its value and
+  installation access work.
 - If the canonical reference cannot be read completely, the skill stops
   without modifying the repository.
