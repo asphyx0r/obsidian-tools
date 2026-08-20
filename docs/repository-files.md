@@ -48,7 +48,9 @@ optional, deferred, or explicitly excluded from this repository.
   and publication workflow.
 - Usage: Use through `$git-commit-push-tag` only when explicitly requested.
 - Notes: Repository mutation requires an explicit bump. GitHub Release
-  publication requires a separate explicit parameter and produces no assets.
+  publication requires a separate explicit parameter, a successful preflight
+  of common release workflows and GitHub App configuration, and produces no
+  assets.
 
 ### `.agents/skills/git-commit-push-tag/SKILL.md`
 
@@ -57,7 +59,8 @@ optional, deferred, or explicitly excluded from this repository.
 - Goal: Loads the canonical guarded Git workflow instructions.
 - Usage: Codex loads this file after explicit skill invocation.
 - Notes: The canonical reference is the sole behavioral source of truth,
-  including exact-file commit validation, remote audit checks, and the stable,
+  including exact-file commit validation, remote audit checks, the common
+  `Agent rules update` and `Repository audit` release runs, and the stable,
   asset-free GitHub Release contract.
 
 ### `.agents/skills/git-commit-push-tag/agents/`
@@ -94,7 +97,8 @@ optional, deferred, or explicitly excluded from this repository.
   release-artifact preparation, remote audit preflight, tag, atomic push,
   synchronization, and stable asset-free GitHub Release behavior.
 - Usage: Read completely before the skill takes any action or runs Git.
-- Notes: Preserve this file as the skill's sole behavioral source of truth.
+- Notes: Preserve this file as the skill's sole behavioral source of truth. It
+  requires the common `Agent rules update` and `Repository audit` release runs.
 
 ### `.betterleaks.toml`
 
@@ -232,7 +236,9 @@ optional, deferred, or explicitly excluded from this repository.
   files, and runs in the starter kit as well as downstream repositories. Set
   `AGENT_RULES_SYNC_ENABLED=false` to suspend scheduled and manual runs;
   published releases always run the job. Cumulative upgrades replace this
-  universal workflow.
+  universal workflow. The guarded release flow requires the repository variable
+  `AGENT_RULES_APP_CLIENT_ID` and secret `AGENT_RULES_APP_PRIVATE_KEY` before
+  publication, then requires the exact automatic release run to succeed.
 
 ### `.github/workflows/release-artifacts.yml`
 
