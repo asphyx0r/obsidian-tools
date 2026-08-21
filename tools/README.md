@@ -110,9 +110,13 @@ python tools/release-artifacts.py --dry-run prepare \
   --metadata-file /external/path/release-metadata.json
 ```
 
-The metadata file must supply every release-specific value. The tool never
-infers unknown business metadata. Generate only after the preview succeeds,
-then validate the staged files with:
+The metadata file must supply every release-specific value. The canonical
+release workflow resolves provable values from explicit current input,
+authoritative project sources, exact release facts, or a non-conflicting
+previous manifest. It asks the user only for unresolved or contradictory values
+and requires explicit validation. Do not copy illustrative values into a real
+release. Generate only after the preview succeeds, then validate the staged
+files with:
 
 ```bash
 python tools/release-artifacts.py check \

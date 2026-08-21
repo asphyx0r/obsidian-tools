@@ -416,9 +416,11 @@ optional, deferred, or explicitly excluded from this repository.
   metadata.
 - Usage: Validate it with `templates/release/manifest.schema.json` and compare
   its inventory with `SHA256SUMS`.
-- Notes: Generated from `templates/release/manifest.template.json`. Unknown
-  release metadata must be supplied by the user and is never inferred. It is
-  not created by this starter-kit alignment.
+- Notes: Generated from `templates/release/manifest.template.json`. The release
+  workflow resolves values from explicit current input, authoritative project
+  sources, exact release facts, or a non-conflicting previous manifest. It asks
+  the user only for unresolved or contradictory values and never invents a
+  default. It is not created by this starter-kit alignment.
 
 ### `AGENTS.md`
 
