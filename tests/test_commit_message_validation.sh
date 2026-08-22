@@ -153,14 +153,32 @@ if ! git rev-list "$resolved_base..HEAD" | grep -Fx "$invalid_commit" >/dev/null
 fi
 
 range_failure_output="$test_temp/range-failure.out"
+export COMMITLINT_EXEMPT_COMMIT="$invalid_commit"
 if run_commitlint_readonly "$commitlint_command" \
   >"$range_failure_output" 2>&1; then
   fail "release range accepted the invalid intermediate commit"
 fi
+unset COMMITLINT_EXEMPT_COMMIT
 if ! grep -F 'body-max-line-length' "$range_failure_output" >/dev/null; then
   sed 's/^/  /' "$range_failure_output" >&2
   fail "release range failure did not report body-max-line-length"
 fi
+
+original_commitlint_exempt_commit="${commitlint_exempt_commit:-}"
+commitlint_exempt_commit="$invalid_commit"
+range_exemption_output="$test_temp/range-exemption.out"
+if ! run_commitlint_readonly "$commitlint_command" \
+  >"$range_exemption_output" 2>&1; then
+  sed 's/^/  /' "$range_exemption_output" >&2
+  fail "release range rejected the exact published exemption"
+fi
+if ! grep -F \
+  "Commitlint: exempting published commit $invalid_commit (body-max-line-length)." \
+  "$range_exemption_output" >/dev/null; then
+  sed 's/^/  /' "$range_exemption_output" >&2
+  fail "release range did not report the exact published exemption"
+fi
+commitlint_exempt_commit="$original_commitlint_exempt_commit"
 
 git tag -a v1.1.0 -m 'Release v1.1.0'
 export GITHUB_EVENT_NAME=release

@@ -6,6 +6,8 @@ audit_temp=""
 audit_temp_parent=""
 audit_temp_parent_created="false"
 audit_all_commits_marker="__all_commits__"
+# Amending this published commit would rewrite main and its descendants.
+commitlint_exempt_commit="bde6a089e940b49ce1e4eaaf121bdbb23825ffec"
 stable_semver_tag_pattern='^v(0|[1-9][0-9]*)\.'
 stable_semver_tag_pattern+='(0|[1-9][0-9]*)\.'
 stable_semver_tag_pattern+='(0|[1-9][0-9]*)$'
@@ -903,13 +905,62 @@ check_release_guard_contract() {
   fi
 }
 
+run_commitlint_ranges() {
+  local from_ref="$1"
+  local to_ref="$2"
+  shift 2
+
+  local exempt_parent
+  local from_commit
+  local segment_count
+
+  if ! git rev-parse --verify --quiet \
+    "${commitlint_exempt_commit}^{commit}" >/dev/null ||
+    ! git merge-base --is-ancestor "$from_ref" "$commitlint_exempt_commit" ||
+    ! git merge-base --is-ancestor "$commitlint_exempt_commit" "$to_ref"; then
+    "$@" --config commitlint.config.cjs --from "$from_ref" --to "$to_ref"
+    return
+  fi
+
+  from_commit="$(git rev-parse "${from_ref}^{commit}")"
+  if [ "$from_commit" = "$commitlint_exempt_commit" ]; then
+    "$@" --config commitlint.config.cjs --from "$from_ref" --to "$to_ref"
+    return
+  fi
+
+  exempt_parent="$(git rev-parse "${commitlint_exempt_commit}^")"
+  segment_count="$(git rev-list --count "$from_ref..$exempt_parent")"
+  if [ "$segment_count" -gt 0 ]; then
+    "$@" --config commitlint.config.cjs \
+      --from "$from_ref" \
+      --to "$exempt_parent"
+  fi
+
+  printf 'Commitlint: exempting published commit %s (body-max-line-length).\n' \
+    "$commitlint_exempt_commit" >&2
+
+  segment_count="$(
+    git rev-list --count "$commitlint_exempt_commit..$to_ref"
+  )"
+  if [ "$segment_count" -gt 0 ]; then
+    "$@" --config commitlint.config.cjs \
+      --from "$commitlint_exempt_commit" \
+      --to "$to_ref"
+  fi
+}
+
 run_commitlint() {
   local from_ref=""
   local root_commit=""
   local to_ref=""
   local commit_count
   local npx_cmd
+  local -a commitlint_invocation
   npx_cmd="$(resolve_npx_command)"
+  commitlint_invocation=(
+    env NPM_CONFIG_IGNORE_SCRIPTS=true
+    "$npx_cmd" --yes @commitlint/cli@21.0.2
+  )
 
   to_ref="$(resolve_audit_to_ref)"
 
@@ -919,8 +970,8 @@ run_commitlint() {
 
   if [ "$from_ref" = "$audit_all_commits_marker" ]; then
     root_commit="$(git rev-list --max-parents=0 --reverse "$to_ref" | tail -n 1)"
-    git log -1 --format=%B "$root_commit" | NPM_CONFIG_IGNORE_SCRIPTS=true \
-      "$npx_cmd" --yes @commitlint/cli@21.0.2 --config commitlint.config.cjs
+    git log -1 --format=%B "$root_commit" |
+      "${commitlint_invocation[@]}" --config commitlint.config.cjs
     from_ref="$root_commit"
   fi
 
@@ -930,13 +981,11 @@ run_commitlint() {
       return
     fi
 
-    NPM_CONFIG_IGNORE_SCRIPTS=true "$npx_cmd" --yes @commitlint/cli@21.0.2 \
-      --config commitlint.config.cjs \
-      --from "$from_ref" \
-      --to "$to_ref"
+    run_commitlint_ranges \
+      "$from_ref" "$to_ref" "${commitlint_invocation[@]}"
   else
-    git log -1 --format=%B "$to_ref" | NPM_CONFIG_IGNORE_SCRIPTS=true \
-      "$npx_cmd" --yes @commitlint/cli@21.0.2 --config commitlint.config.cjs
+    git log -1 --format=%B "$to_ref" |
+      "${commitlint_invocation[@]}" --config commitlint.config.cjs
   fi
 }
 
@@ -1071,6 +1120,8 @@ run_commitlint_readonly() {
   local root_commit=""
   local to_ref=""
   local commit_count
+  local -a commitlint_invocation
+  commitlint_invocation=("$commitlint_cmd")
 
   to_ref="$(resolve_audit_to_ref)"
 
@@ -1081,7 +1132,7 @@ run_commitlint_readonly() {
   if [ "$from_ref" = "$audit_all_commits_marker" ]; then
     root_commit="$(git rev-list --max-parents=0 --reverse "$to_ref" | tail -n 1)"
     git log -1 --format=%B "$root_commit" |
-      "$commitlint_cmd" --config commitlint.config.cjs
+      "${commitlint_invocation[@]}" --config commitlint.config.cjs
     from_ref="$root_commit"
   fi
 
@@ -1091,13 +1142,11 @@ run_commitlint_readonly() {
       return
     fi
 
-    "$commitlint_cmd" \
-      --config commitlint.config.cjs \
-      --from "$from_ref" \
-      --to "$to_ref"
+    run_commitlint_ranges \
+      "$from_ref" "$to_ref" "${commitlint_invocation[@]}"
   else
     git log -1 --format=%B "$to_ref" |
-      "$commitlint_cmd" --config commitlint.config.cjs
+      "${commitlint_invocation[@]}" --config commitlint.config.cjs
   fi
 }
 
