@@ -2,6 +2,20 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v1.0.3
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| be9591a | fix(ci): exempt published commit from lint | asphyx |
+| d42598c | chore(agents): sync agent rules to v1.42.0 | agent-coding-rules-sync[bot] |
+| bde6a08 | chore(config): adopt starter kit v2.7.0 | asphyx |
+| 18421fd | chore(config): adopt starter kit v2.6.1 (#5) | asphyx |
+| 19869d0 | chore(config): adopt starter kit v2.6.0 | asphyx |
+| b664bfd | chore(config): adopt starter kit v2.5.0 | asphyx |
+| a6fee5f | chore(config): adopt starter kit v2.4.2 | asphyx |
+| 98e14fe | chore(agents): sync rules to v1.41.2 | asphyx |
+| c6152b3 | chore(config): adopt starter kit v2.4.1 | asphyx |
+
 ## v1.0.2
 
 | References | Description | Author(s) |
