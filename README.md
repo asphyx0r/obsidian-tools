@@ -8,9 +8,11 @@ so the command can be run again safely when the vault structure already exists.
 
 - Creates the repository's standard notes, templates, attachments, archive,
   and sandbox directories.
+- Adds a zero-byte `.gitkeep` file to every empty subdirectory below `notes/`,
+  including empty custom subdirectories found at runtime.
 - Supports a side-effect-free `--dry-run` preview.
 - Accepts an explicit vault root on Windows, Linux, and macOS.
-- Reports created, existing, and planned directories.
+- Reports directory and `.gitkeep` outcomes separately.
 
 ## Requirements
 
@@ -41,14 +43,46 @@ Use `--help` to display every supported option:
 python scripts/initialize-obsidian-vault-structure.py --help
 ```
 
-When `--root` is omitted, the default is `G:\Mon Drive\Obsidian` on Windows
-and `~/Obsidian` on other platforms.
+When `--root` is omitted, the default is `G:\Mon Drive\obsidian-vault` on
+Windows and `~/Obsidian` on other platforms.
 
 ## Directory structure
 
-The tool creates top-level directories for notes, templates, attachments,
-archives, and sandbox content. The notes tree includes inbox, work, code,
-projects, fintech, and hobby categories defined by the script.
+The tool creates the following default notes tree:
+
+```text
+notes/
+|-- inbox/
+|-- books/
+|   `-- specifications/
+|-- fintech/
+|-- work/
+|   `-- datalog/
+|-- code/
+|   |-- python/
+|   |-- powershell/
+|   |-- bash/
+|   `-- sql/
+|-- devtools/
+|   |-- codex/
+|   |-- claude/
+|   |-- git/
+|   |-- github/
+|   `-- vscode/
+|-- projects/
+|   `-- prompts-source-control/
+`-- hobbies/
+    |-- warhammer/
+    |-- magic-the-gathering/
+    `-- graffiti/
+```
+
+It also creates the top-level `templates/`, `attachments/`, `archive/`, and
+`sandbox/` directories. Empty subdirectories below `notes/` receive a
+zero-byte `.gitkeep`; existing files and existing `.gitkeep` contents are never
+modified. Directory links and Windows reparse points are not followed. The
+system directories `.githooks/`, `.github/`, `.GitHub/`, and `.obsidian/` are
+not managed by the tool.
 
 Review the `--dry-run` output before using the default structure with an
 existing vault.

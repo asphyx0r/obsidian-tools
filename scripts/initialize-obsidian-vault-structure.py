@@ -5,19 +5,23 @@ from __future__ import annotations
 
 import logging
 import os
+import stat
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Sequence
 
 SCRIPT_NAME: Final[str] = Path(__file__).name
 SCRIPT_VERSION: Final[str] = "1.0.0"
 
-WINDOWS_DEFAULT_ROOT: Final[Path] = Path(r"G:\Mon Drive\Obsidian")
+WINDOWS_DEFAULT_ROOT: Final[Path] = Path(r"G:\Mon Drive\obsidian-vault")
 LINUX_DEFAULT_ROOT: Final[Path] = Path.home() / "Obsidian"
 
 RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes"),
     Path("notes", "inbox"),
+    Path("notes", "books"),
+    Path("notes", "books", "specifications"),
     Path("notes", "fintech"),
     Path("notes", "work"),
     Path("notes", "work", "datalog"),
@@ -26,6 +30,12 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "code", "powershell"),
     Path("notes", "code", "bash"),
     Path("notes", "code", "sql"),
+    Path("notes", "devtools"),
+    Path("notes", "devtools", "codex"),
+    Path("notes", "devtools", "claude"),
+    Path("notes", "devtools", "git"),
+    Path("notes", "devtools", "github"),
+    Path("notes", "devtools", "vscode"),
     Path("notes", "projects"),
     Path("notes", "projects", "prompts-source-control"),
     Path("notes", "hobbies"),
@@ -39,6 +49,18 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
 )
 
 LOGGER = logging.getLogger(SCRIPT_NAME)
+
+
+@dataclass(frozen=True)
+class InitializationSummary:
+    """Count directory and .gitkeep initialization outcomes."""
+
+    directories_created: int
+    directories_existing: int
+    directories_planned: int
+    gitkeep_created: int
+    gitkeep_existing: int
+    gitkeep_planned: int
 
 
 class CliError(ValueError):
@@ -137,9 +159,29 @@ def configure_logging(verbose: bool) -> None:
     )
 
 
+def is_directory_link(path: Path) -> bool:
+    """Return whether path is a symbolic link or Windows reparse point."""
+    if path.is_symlink():
+        return True
+
+    try:
+        file_status = path.stat(follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+
+    file_attributes = getattr(file_status, "st_file_attributes", 0)
+    reparse_point = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    return bool(file_attributes & reparse_point)
+
+
 def ensure_directory(path: Path, dry_run: bool) -> str:
     """Ensure that a directory exists and return its resulting status."""
     if path.exists():
+        if is_directory_link(path):
+            raise OSError(
+                f"The path is a directory link and will not be followed: {path}"
+            )
+
         if not path.is_dir():
             raise NotADirectoryError(
                 f"The path exists but is not a directory: {path}"
@@ -157,7 +199,110 @@ def ensure_directory(path: Path, dry_run: bool) -> str:
     return "created"
 
 
-def initialize_vault(root_path: Path, dry_run: bool) -> tuple[int, int, int]:
+def raise_walk_error(error: OSError) -> None:
+    """Propagate an error raised while scanning note subdirectories."""
+    raise error
+
+
+def find_note_subdirectories(notes_root: Path) -> tuple[Path, ...]:
+    """Return real subdirectories below the notes root without links."""
+    if not notes_root.is_dir():
+        return ()
+
+    subdirectories: list[Path] = []
+
+    for current_root, directory_names, _file_names in os.walk(
+        notes_root,
+        onerror=raise_walk_error,
+        followlinks=False,
+    ):
+        current_path = Path(current_root)
+        real_directory_names = []
+
+        for directory_name in directory_names:
+            directory = current_path / directory_name
+
+            if is_directory_link(directory):
+                continue
+
+            real_directory_names.append(directory_name)
+            subdirectories.append(directory)
+
+        directory_names[:] = real_directory_names
+
+    return tuple(sorted(subdirectories, key=lambda path: str(path).casefold()))
+
+
+def get_note_subdirectories(vault_root: Path) -> tuple[Path, ...]:
+    """Return existing and planned subdirectories below the notes root."""
+    notes_root = vault_root / "notes"
+    existing_directories = set(find_note_subdirectories(notes_root))
+    planned_directories = {
+        vault_root / relative_path
+        for relative_path in RELATIVE_DIRECTORIES
+        if relative_path.parts[0] == "notes" and len(relative_path.parts) > 1
+    }
+    directories = existing_directories | planned_directories
+    return tuple(sorted(directories, key=lambda path: str(path).casefold()))
+
+
+def uses_directory_link(path: Path, notes_root: Path) -> bool:
+    """Return whether path is or is below a symbolic directory link."""
+    current_path = path
+
+    while current_path != notes_root:
+        if is_directory_link(current_path):
+            return True
+
+        current_path = current_path.parent
+
+    return False
+
+
+def ensure_gitkeep_files(vault_root: Path, dry_run: bool) -> tuple[int, int, int]:
+    """Ensure that empty note subdirectories contain a .gitkeep file."""
+    created_count = 0
+    existing_count = 0
+    planned_count = 0
+    notes_root = vault_root / "notes"
+    directories = get_note_subdirectories(vault_root)
+
+    for directory in directories:
+        if uses_directory_link(directory, notes_root):
+            continue
+
+        gitkeep_path = directory / ".gitkeep"
+
+        if gitkeep_path.exists():
+            if not gitkeep_path.is_file():
+                raise IsADirectoryError(
+                    f"The path exists but is not a file: {gitkeep_path}"
+                )
+
+            existing_count += 1
+            continue
+
+        has_existing_entries = directory.is_dir() and any(directory.iterdir())
+        has_planned_child = any(
+            candidate.parent == directory for candidate in directories
+        )
+
+        if has_existing_entries or has_planned_child:
+            continue
+
+        if dry_run:
+            print(f"CREATE  {gitkeep_path}")
+            planned_count += 1
+            continue
+
+        gitkeep_path.touch(exist_ok=False)
+        print(f"CREATED {gitkeep_path}")
+        created_count += 1
+
+    return created_count, existing_count, planned_count
+
+
+def initialize_vault(root_path: Path, dry_run: bool) -> InitializationSummary:
     """Create the vault directory structure."""
     resolved_root = root_path.absolute()
 
@@ -183,7 +328,19 @@ def initialize_vault(root_path: Path, dry_run: bool) -> tuple[int, int, int]:
         elif status == "planned":
             planned_count += 1
 
-    return created_count, existing_count, planned_count
+    gitkeep_created, gitkeep_existing, gitkeep_planned = ensure_gitkeep_files(
+        resolved_root,
+        dry_run,
+    )
+
+    return InitializationSummary(
+        directories_created=created_count,
+        directories_existing=existing_count,
+        directories_planned=planned_count,
+        gitkeep_created=gitkeep_created,
+        gitkeep_existing=gitkeep_existing,
+        gitkeep_planned=gitkeep_planned,
+    )
 
 
 def main(arguments: Sequence[str] | None = None) -> int:
@@ -203,7 +360,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     configure_logging(verbose)
 
     try:
-        created_count, existing_count, planned_count = initialize_vault(
+        summary = initialize_vault(
             root_path=root_path,
             dry_run=dry_run,
         )
@@ -216,14 +373,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
     if dry_run:
         print(
             "Dry-run completed: "
-            f"{planned_count} directories would be created; "
-            f"{existing_count} directories already exist."
+            f"{summary.directories_planned} directories would be created; "
+            f"{summary.directories_existing} directories already exist; "
+            f"{summary.gitkeep_planned} .gitkeep files would be created; "
+            f"{summary.gitkeep_existing} .gitkeep files already exist."
         )
     else:
         print(
             "Completed: "
-            f"{created_count} directories created; "
-            f"{existing_count} directories already existed."
+            f"{summary.directories_created} directories created; "
+            f"{summary.directories_existing} directories already existed; "
+            f"{summary.gitkeep_created} .gitkeep files created; "
+            f"{summary.gitkeep_existing} .gitkeep files already existed."
         )
 
     return 0

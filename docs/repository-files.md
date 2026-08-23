@@ -565,8 +565,13 @@ optional, deferred, or explicitly excluded from this repository.
 - Usage: Run with `--root` to select a vault, use `--dry-run` to preview all
   changes, and use `--help` or `--version` for CLI information.
 - Notes: Requires Python 3.10 or later and no third-party package. Existing
-  directories are preserved, repeated execution is safe, and omitted roots
-  use the documented platform-specific defaults.
+  directories and files are preserved, repeated execution is idempotent, and
+  omitted roots use `G:\Mon Drive\obsidian-vault` on Windows or `~/Obsidian`
+  elsewhere. The tool creates zero-byte `.gitkeep` files in empty
+  subdirectories below `notes/`, reports directory and `.gitkeep` outcomes
+  separately, refuses to follow directory links or Windows reparse points, and
+  does not manage system directories such as `.githooks/`, `.github/`,
+  `.GitHub/`, or `.obsidian/`.
 
 ### `tools/`
 
@@ -711,6 +716,18 @@ optional, deferred, or explicitly excluded from this repository.
 - Notes: Uses only `unittest` and the Python standard library. Git-dependent
   and symbolic-link cases skip only when the required platform capability is
   unavailable.
+
+### `tests/test_initialize_obsidian_vault_structure.py`
+
+- Type: `file`
+- Status: `required`
+- Goal: Verifies the default vault tree, recursive `.gitkeep` creation,
+  side-effect-free dry runs, system-directory isolation, data preservation,
+  error handling, and repeated-execution idempotence.
+- Usage: Run
+  `python -B -m unittest tests.test_initialize_obsidian_vault_structure`.
+- Notes: Uses only `unittest` and the Python standard library, isolates writes
+  in temporary directories, and never modifies a live Obsidian vault.
 
 ### `tests/test_release_artifacts.py`
 
