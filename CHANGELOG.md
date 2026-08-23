@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.0.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| b5a44a6 | feat(tools)!: expand vault initialization | asphyx |
+
 ## v1.0.3
 
 | References | Description | Author(s) |
