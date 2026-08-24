@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.1.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| a12c869 | feat(tools): add multiplexer note directories | asphyx |
+
 ## v2.0.0
 
 | References | Description | Author(s) |
