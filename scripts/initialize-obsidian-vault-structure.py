@@ -36,6 +36,8 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "devtools", "git"),
     Path("notes", "devtools", "github"),
     Path("notes", "devtools", "vscode"),
+    Path("notes", "devtools", "tmux"),
+    Path("notes", "devtools", "psmux"),
     Path("notes", "projects"),
     Path("notes", "projects", "prompts-source-control"),
     Path("notes", "hobbies"),

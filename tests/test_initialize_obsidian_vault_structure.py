@@ -117,6 +117,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/git",
             "notes/devtools/github",
             "notes/devtools/vscode",
+            "notes/devtools/tmux",
+            "notes/devtools/psmux",
             "notes/fintech",
             "notes/hobbies",
             "notes/hobbies/graffiti",
@@ -156,6 +158,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/git/.gitkeep",
             "notes/devtools/github/.gitkeep",
             "notes/devtools/vscode/.gitkeep",
+            "notes/devtools/tmux/.gitkeep",
+            "notes/devtools/psmux/.gitkeep",
             "notes/fintech/.gitkeep",
             "notes/hobbies/graffiti/.gitkeep",
             "notes/hobbies/magic-the-gathering/.gitkeep",
@@ -177,7 +181,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             gitkeep_contents = [path.read_bytes() for path in gitkeep_files]
 
         self.assertEqual(actual_gitkeep_files, expected_gitkeep_files)
-        self.assertEqual(gitkeep_contents, [b""] * 17)
+        self.assertEqual(gitkeep_contents, [b""] * 19)
 
     def test_custom_empty_note_directory_receives_gitkeep(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -236,10 +240,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertFalse(root_exists)
-        self.assertEqual(len(gitkeep_plan_lines), 17)
+        self.assertEqual(len(gitkeep_plan_lines), 19)
         self.assertIn(
-            "Dry-run completed: 29 directories would be created; "
-            "0 directories already exist; 17 .gitkeep files would be "
+            "Dry-run completed: 31 directories would be created; "
+            "0 directories already exist; 19 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -286,8 +290,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 6 directories would be created; "
-            "23 directories already exist; 16 .gitkeep files would be "
+            "Dry-run completed: 8 directories would be created; "
+            "23 directories already exist; 18 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -316,14 +320,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 29 directories created; 0 directories already "
-            "existed; 17 .gitkeep files created; 0 .gitkeep files already "
+            "Completed: 31 directories created; 0 directories already "
+            "existed; 19 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 29 directories already "
-            "existed; 0 .gitkeep files created; 17 .gitkeep files already "
+            "Completed: 0 directories created; 31 directories already "
+            "existed; 0 .gitkeep files created; 19 .gitkeep files already "
             "existed."
         )
         self.assertIn(repeated_summary, second_stdout)
@@ -377,7 +381,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             gitkeep_contents = gitkeep_path.read_bytes()
 
         self.assertEqual(gitkeep_contents, b"preserve existing content\n")
-        self.assertEqual(result.gitkeep_created, 17)
+        self.assertEqual(result.gitkeep_created, 19)
         self.assertEqual(result.gitkeep_existing, 1)
 
     def test_gitkeep_directory_conflict_returns_error_without_overwrite(self):

@@ -68,7 +68,9 @@ notes/
 |   |-- claude/
 |   |-- git/
 |   |-- github/
-|   `-- vscode/
+|   |-- vscode/
+|   |-- tmux/
+|   `-- psmux/
 |-- projects/
 |   `-- prompts-source-control/
 `-- hobbies/
