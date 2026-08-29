@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.2.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 8769ac2 | feat(tools): add task and recipe directories | asphyx |
+
 ## v2.1.0
 
 | References | Description | Author(s) |
