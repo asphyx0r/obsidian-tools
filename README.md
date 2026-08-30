@@ -53,6 +53,7 @@ The tool creates the following default notes tree:
 ```text
 notes/
 |-- inbox/
+|-- goals/
 |-- tasks/
 |   |-- daily/
 |   |-- backlogs/
@@ -85,11 +86,11 @@ notes/
 ```
 
 It also creates the top-level `templates/`, `attachments/`, `archive/`, and
-`sandbox/` directories, including `archive/tasks/`. Empty subdirectories below
-`notes/` receive a zero-byte `.gitkeep`; existing files and existing `.gitkeep`
-contents are never modified. Directory links and Windows reparse points are
-not followed. The system directories `.githooks/`, `.github/`, `.GitHub/`, and
-`.obsidian/` are not managed by the tool.
+`sandbox/` directories, including `archive/tasks/` and `archive/goals/`. Empty
+subdirectories below `notes/` receive a zero-byte `.gitkeep`; existing files
+and existing `.gitkeep` contents are never modified. Directory links and
+Windows reparse points are not followed. The system directories `.githooks/`,
+`.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
 Review the `--dry-run` output before using the default structure with an
 existing vault.

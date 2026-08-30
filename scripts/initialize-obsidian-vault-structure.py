@@ -20,6 +20,7 @@ LINUX_DEFAULT_ROOT: Final[Path] = Path.home() / "Obsidian"
 RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes"),
     Path("notes", "inbox"),
+    Path("notes", "goals"),
     Path("notes", "tasks"),
     Path("notes", "tasks", "daily"),
     Path("notes", "tasks", "backlogs"),
@@ -53,6 +54,7 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("attachments"),
     Path("archive"),
     Path("archive", "tasks"),
+    Path("archive", "goals"),
     Path("sandbox"),
 )
 
