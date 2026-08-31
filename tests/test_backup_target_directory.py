@@ -5,9 +5,10 @@ import io
 import shutil
 import subprocess
 import sys
+import time
 import unittest
 import zipfile
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -15,6 +16,9 @@ from unittest import mock
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1] / "tools" / "backup-target-directory.py"
 )
+WINDOWS_DIRECTORY_NOT_EMPTY = 145
+TEMPORARY_DIRECTORY_CLEANUP_TIMEOUT_SECONDS = 1.0
+TEMPORARY_DIRECTORY_CLEANUP_RETRY_DELAY_SECONDS = 0.01
 
 
 def load_script_module():
@@ -25,6 +29,31 @@ def load_script_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def cleanup_temporary_directory(temporary_directory) -> None:
+    deadline = time.monotonic() + TEMPORARY_DIRECTORY_CLEANUP_TIMEOUT_SECONDS
+
+    while True:
+        try:
+            temporary_directory.cleanup()
+            return
+        except OSError as error:
+            if (
+                getattr(error, "winerror", None) != WINDOWS_DIRECTORY_NOT_EMPTY
+                or time.monotonic() >= deadline
+            ):
+                raise
+            time.sleep(TEMPORARY_DIRECTORY_CLEANUP_RETRY_DELAY_SECONDS)
+
+
+@contextmanager
+def retrying_temporary_directory():
+    temporary_directory = TemporaryDirectory()
+    try:
+        yield temporary_directory.name
+    finally:
+        cleanup_temporary_directory(temporary_directory)
 
 
 class BackupTargetDirectoryTest(unittest.TestCase):
@@ -56,6 +85,28 @@ class BackupTargetDirectoryTest(unittest.TestCase):
             text=True,
         )
         return result.stdout.strip()
+
+    def test_cleanup_retries_windows_directory_not_empty(self) -> None:
+        class WindowsDirectoryNotEmptyError(OSError):
+            winerror = 145
+
+        class FlakyTemporaryDirectory:
+            def __init__(self) -> None:
+                self.cleanup_calls = 0
+
+            def cleanup(self) -> None:
+                self.cleanup_calls += 1
+                if self.cleanup_calls == 1:
+                    raise WindowsDirectoryNotEmptyError("directory not empty")
+
+        temporary_directory = FlakyTemporaryDirectory()
+
+        try:
+            cleanup_temporary_directory(temporary_directory)
+        except OSError as error:
+            self.fail(f"Temporary directory cleanup was not retried: {error}")
+
+        self.assertEqual(temporary_directory.cleanup_calls, 2)
 
     def test_escaped_trailing_slash_arguments_are_reassembled(self) -> None:
         source = "G:\\Mon Drive\\Datalog\\Projects\\SWIFT\\vendor-interface-validation"
@@ -482,7 +533,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
                     self.assertEqual(list(target.iterdir()), [])
 
     def test_backup_creates_archive_with_git_identity_in_name(self) -> None:
-        with TemporaryDirectory() as temp_dir:
+        with retrying_temporary_directory() as temp_dir:
             temp_path = Path(temp_dir)
             source = temp_path / "Source Project"
             target = temp_path / "target"
@@ -526,7 +577,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("git"), "Git is required for this test.")
     def test_backup_of_git_repository_is_complete_and_readable(self) -> None:
-        with TemporaryDirectory() as temp_dir:
+        with retrying_temporary_directory() as temp_dir:
             temp_path = Path(temp_dir)
             source = temp_path / "repository"
             target = temp_path / "target"
