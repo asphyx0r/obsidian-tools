@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.3.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 91af393 | test(tools): retry Windows cleanup | asphyx |
+| 270eeee | feat(tools): add goal directories | asphyx |
+
 ## v2.2.0
 
 | References | Description | Author(s) |
