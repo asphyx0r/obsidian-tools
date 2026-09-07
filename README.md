@@ -54,6 +54,7 @@ The tool creates the following default notes tree:
 notes/
 |-- inbox/
 |-- goals/
+|-- gtd/
 |-- tasks/
 |   |-- daily/
 |   |-- backlogs/
@@ -94,6 +95,10 @@ Windows reparse points are not followed. The system directories `.githooks/`,
 
 Review the `--dry-run` output before using the default structure with an
 existing vault.
+
+The `notes/gtd/` directory is intended for GTD sorting files. Create
+`next-actions.md`, `waiting-for.md`, `someday.md`, and `weekly-review.md`
+manually in this directory; the tool does not create these Markdown files.
 
 ## Contributing
 

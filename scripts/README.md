@@ -40,8 +40,13 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/tasks/recurring/`                        | Tâches répétitives définies avec une cadence ou une règle de récurrence                                                   |
 | `notes/recipes/`                                | Recettes de cuisine conservées dans le Vault                                                                              |
 | `notes/goals/`                                  | Notes consacrées aux objectifs actuellement envisagés ou poursuivis                                                       |
+| `notes/gtd/`                                    | Fichiers de tri GTD                                                                                                       |
 | `attachments/`                                  | Images, documents et autres fichiers joints référencés par les notes du Vault                                             |
 | `archive/`                                      | Racine des contenus qui ne sont plus actifs mais doivent être conservés pour leur historique ou leur consultation         |
 | `archive/tasks/`                                | Tâches terminées, abandonnées, annulées ou devenues obsolètes, retirées des listes actives                                |
 | `archive/goals/`                                | Objectifs qui ne sont plus actifs, afin de conserver leur historique sans encombrer les objectifs courants                |
 | `sandbox/`                                      | Notes et fichiers temporaires utilisés pour les essais, expérimentations ou validations avant classement définitif        |
+
+Dans `notes/gtd/`, les fichiers `next-actions.md`, `waiting-for.md`, `someday.md`
+et `weekly-review.md` sont à créer par l'utilisateur. Le programme crée uniquement
+le répertoire et son `.gitkeep` s'il est vide.
