@@ -2,15 +2,15 @@
     "manifest_version": "2.0.0",
     "program_id": "obsidian-tools",
     "name": "Obsidian Tools",
-    "version": "2.4.0",
-    "release_date": "2026-09-20T09:17:58Z",
+    "version": "2.4.1",
+    "release_date": "2026-09-20T10:51:56Z",
     "channel": "stable",
     "critical_update": false,
     "release_notes": [
-        "Add notes/gtd/ for GTD sorting files and document the managed vault directories.",
-        "Add notes/devtools/github/repositories/ and notes/profiles/ to the managed vault tree.",
-        "Add attachments/notes/profiles/hinge/ and preserve this directory with a zero-byte .gitkeep when empty.",
-        "Expand the default structure to 45 directories and 27 .gitkeep files while preserving existing contents and dry-run behavior."
+        "Complete the managed tree with GTD and profile templates (47 directories including the vault root).",
+        "Reject option tokens used as root paths and validate managed paths, ancestors, access, and placeholders before creation.",
+        "Share preflight checks between simulation and execution and report partial write failures without rollback.",
+        "Expand regression coverage and document directory counts, dry-run guarantees, and error behavior."
     ],
     "update": {
         "min_source_version": "2.2.0",
@@ -24,7 +24,7 @@
     },
     "artifacts": [
         {
-            "id": "obsidian-tools-v2.4.0",
+            "id": "obsidian-tools-v2.4.1",
             "target": {
                 "os": "any",
                 "arch": "any",
@@ -32,9 +32,9 @@
             },
             "format": "git-tree",
             "total_files": 75,
-            "size_bytes": 773249,
-            "built_at": "2026-09-20T09:17:58Z",
-            "sha256": "46fbe834868800dca2a06d438a4c0c962777f2f28fb6e13d22c7960582febea3",
+            "size_bytes": 791204,
+            "built_at": "2026-09-20T10:51:56Z",
+            "sha256": "8c982d845774f48c6ac0ea4e05e2c6095664aa08a5d87f10fb360dec1ca3e0a0",
             "files": [
                 {
                     "relative_path": ".agents/skills/git-commit-push-tag/SKILL.md",
@@ -272,11 +272,11 @@
                 },
                 {
                     "relative_path": "CHANGELOG.md",
-                    "size_bytes": 2204,
+                    "size_bytes": 2347,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "e5c8c8d1eb619c51c8272f70d7e15387156bfb783bb9196938f680660ce0dbed",
+                    "sha256": "8967d0e080c91678973a58951d68a9be5b6bb9678559dc012fa4000bb551f74e",
                     "mode": "644"
                 },
                 {
@@ -344,11 +344,11 @@
                 },
                 {
                     "relative_path": "README.md",
-                    "size_bytes": 3231,
+                    "size_bytes": 4777,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "3290a382210631331ced51188b985fde56c2e8975b160882099cd9a1e6460266",
+                    "sha256": "ee378f1a2cee7e361196d5bc4adcb7fa4a391cf3c5a809636e8b1ab7073f80ee",
                     "mode": "644"
                 },
                 {
@@ -384,7 +384,7 @@
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "2ad7b0c3f0ede58c3165b7a8a5479e890a758d39bfe8683eaef50ce6afad7232",
+                    "sha256": "6d850e3ac42d0dd06bfdcce9151c1e6b40f4cf5272778f63eececea27c78f0b6",
                     "mode": "644"
                 },
                 {
@@ -425,11 +425,11 @@
                 },
                 {
                     "relative_path": "docs/repository-files.md",
-                    "size_bytes": 37476,
+                    "size_bytes": 37978,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "7db8d4a4309136766af450b2716327306a745e7261dd9ad5ce67465b6e6ffc11",
+                    "sha256": "913b010c79b047f31edb8c72f34437f1f9330661f193e09a7cd0d6bb4a74c2dd",
                     "mode": "644"
                 },
                 {
@@ -443,20 +443,20 @@
                 },
                 {
                     "relative_path": "scripts/README.md",
-                    "size_bytes": 9208,
+                    "size_bytes": 11292,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "674846474fd47a7def77d7264f62aaefda797042884af4610698cb11785235e8",
+                    "sha256": "13fba272f0abb986a5df89f34f04020b1e99523b18cfa2b6b91303ae97e7ddd6",
                     "mode": "644"
                 },
                 {
                     "relative_path": "scripts/initialize-obsidian-vault-structure.py",
-                    "size_bytes": 12338,
+                    "size_bytes": 15894,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "ba8b6ca3b1e507f682ab0734db99a3d18a6f21cfa56d1808719d62cffda413b6",
+                    "sha256": "a0b5ccaeb5c2587465c0daec5baffad34d3dbfd8d29fa7e9572c2fea3a7fa5f9",
                     "mode": "644"
                 },
                 {
@@ -614,11 +614,11 @@
                 },
                 {
                     "relative_path": "tests/test_initialize_obsidian_vault_structure.py",
-                    "size_bytes": 21943,
+                    "size_bytes": 32067,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "85d04261df10744894df18cdd0aa49065f95cca74c4b5dc68aeddee56c5d0b5f",
+                    "sha256": "af5f4a6f0e72e3528e5f3eb2dc80f28b4731c7a70b08ee4553c4dae2fcffb5a4",
                     "mode": "644"
                 },
                 {
