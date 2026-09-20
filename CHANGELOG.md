@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.4.1
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| d6a75cf | fix(tools): complete safe vault initialization | asphyx |
+
 ## v2.4.0
 
 | References | Description | Author(s) |
