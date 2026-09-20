@@ -570,8 +570,10 @@ optional, deferred, or explicitly excluded from this repository.
   elsewhere. The managed tree includes GitHub repository notes, profile notes,
   Hinge profile attachments, and GTD and profile template directories.
   `notes/ai/chatgpt/` covers ChatGPT usage outside programming and development,
-  while `notes/devtools/` covers tools primarily used in development. A new
-  vault contains 49 directories including its root and 28 `.gitkeep` files.
+  while `notes/devtools/` covers tools primarily used in development.
+  `notes/terminal/` covers terminals, command entry, and CLI tools, with
+  `tmux/` and `psmux/` subdirectories. A new vault contains 50 directories
+  including its root and 28 `.gitkeep` files.
   The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and

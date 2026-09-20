@@ -98,7 +98,8 @@ notes/
 |   |-- git/
 |   |-- github/
 |   |   `-- repositories/
-|   |-- vscode/
+|   `-- vscode/
+|-- terminal/
 |   |-- tmux/
 |   `-- psmux/
 |-- projects/
@@ -112,6 +113,8 @@ notes/
 The `notes/ai/` directory covers AI outside programming and development;
 `notes/ai/chatgpt/` holds notes on ChatGPT usage within that scope.
 The `notes/devtools/` directory covers tools primarily used in development.
+The `notes/terminal/` directory covers terminals, command entry, and CLI tools,
+including tmux and psmux.
 
 It also creates the top-level `templates/`, `attachments/`, `archive/`, and
 `sandbox/` directories, including `templates/gtd/`, `templates/profiles/`,
@@ -125,7 +128,7 @@ Windows reparse points in the root, its ancestors, or managed directories are
 rejected; linked custom note directories are skipped. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
-A new vault contains 49 directories including its root and 28 empty
+A new vault contains 50 directories including its root and 28 empty
 `.gitkeep` files. The initializer does not create notes, template contents,
 or attachments; the template subdirectories do not receive `.gitkeep` files.
 

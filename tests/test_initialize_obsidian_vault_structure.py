@@ -175,8 +175,9 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/github",
             "notes/devtools/github/repositories",
             "notes/devtools/vscode",
-            "notes/devtools/tmux",
-            "notes/devtools/psmux",
+            "notes/terminal",
+            "notes/terminal/tmux",
+            "notes/terminal/psmux",
             "notes/fintech",
             "notes/hobbies",
             "notes/hobbies/graffiti",
@@ -228,8 +229,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/git/.gitkeep",
             "notes/devtools/github/repositories/.gitkeep",
             "notes/devtools/vscode/.gitkeep",
-            "notes/devtools/tmux/.gitkeep",
-            "notes/devtools/psmux/.gitkeep",
+            "notes/terminal/tmux/.gitkeep",
+            "notes/terminal/psmux/.gitkeep",
             "notes/fintech/.gitkeep",
             "notes/goals/.gitkeep",
             "notes/gtd/.gitkeep",
@@ -459,7 +460,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertFalse(root_exists)
         self.assertEqual(len(gitkeep_plan_lines), 28)
         self.assertIn(
-            "Dry-run completed: 49 directories would be created; "
+            "Dry-run completed: 50 directories would be created; "
             "0 directories already exist; 28 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
@@ -507,7 +508,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 26 directories would be created; "
+            "Dry-run completed: 27 directories would be created; "
             "23 directories already exist; 27 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
@@ -537,13 +538,13 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 49 directories created; 0 directories already "
+            "Completed: 50 directories created; 0 directories already "
             "existed; 28 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 49 directories already "
+            "Completed: 0 directories created; 50 directories already "
             "existed; 0 .gitkeep files created; 28 .gitkeep files already "
             "existed."
         )
