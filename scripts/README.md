@@ -28,7 +28,9 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/hobbies/graffiti/`                       | Notes consacrées au graffiti et aux sujets associés                                                                       |
 | `notes/books/`                                  | Notes et documentation relatives aux livres                                                                               |
 | `notes/books/specifications/`                   | Spécifications régissant la structure, les métadonnées ou le traitement des notes relatives aux livres                    |
-| `notes/devtools/`                               | Documentation consacrée aux outils de développement, de versionnement et aux contextes de travail                         |
+| `notes/ai/`                                     | Notes consacrées à l'intelligence artificielle, hors programmation et développement                                       |
+| `notes/ai/chatgpt/`                             | Notes, références et usages de ChatGPT, hors programmation et développement                                               |
+| `notes/devtools/`                               | Documentation consacrée aux outils utilisés principalement dans une activité de développement                             |
 | `notes/devtools/codex/`                         | Notes, références et procédures consacrées à Codex                                                                        |
 | `notes/devtools/claude/`                        | Notes, références et procédures consacrées à Claude                                                                       |
 | `notes/devtools/git/`                           | Notes, références et procédures consacrées à Git                                                                          |
@@ -63,7 +65,7 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 47 répertoires, racine comprise, et 27 fichiers
+Un Vault neuf comprend 49 répertoires, racine comprise, et 28 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 
