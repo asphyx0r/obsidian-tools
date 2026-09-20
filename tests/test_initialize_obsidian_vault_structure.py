@@ -2,6 +2,7 @@ import importlib.util
 import io
 import os
 import pathlib
+import stat
 import subprocess
 import sys
 import tempfile
@@ -50,7 +51,12 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         for path in sorted(root.rglob("*")):
             relative_path = path.relative_to(root).as_posix()
 
-            if path.is_dir():
+            attributes = getattr(path.lstat(), "st_file_attributes", 0)
+            if path.is_symlink() or attributes & getattr(
+                stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
+            ):
+                records.append(("link", relative_path, os.readlink(path)))
+            elif path.is_dir():
                 records.append(("directory", relative_path))
             else:
                 records.append(("file", relative_path, path.read_bytes()))
@@ -90,6 +96,19 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         else:
             link_path.unlink()
 
+    def assert_preflight_failure(self, root, snapshot_root, message):
+        before_snapshot = self.snapshot(snapshot_root)
+        for dry_run in (True, False):
+            with self.subTest(root=root, dry_run=dry_run):
+                arguments = ["--root", str(root)]
+                if dry_run:
+                    arguments.append("--dry-run")
+                code, stdout, stderr = self.run_main(arguments)
+                self.assertEqual(code, 1)
+                self.assertEqual(stdout, "")
+                self.assertIn(message, stderr)
+                self.assertEqual(self.snapshot(snapshot_root), before_snapshot)
+
     def test_windows_default_targets_the_audited_vault(self):
         with patch.object(MODULE.os, "name", "nt"):
             default_root = MODULE.get_default_root()
@@ -98,6 +117,37 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             default_root,
             pathlib.Path(r"G:\Mon Drive\obsidian-vault"),
         )
+
+    def test_root_option_requires_a_value_instead_of_another_option(self):
+        for root_option in ("-r", "--root"):
+            for value in (
+                "--dry-run", "--help", "--version", "-v", "--unknown", "-name"
+            ):
+                with self.subTest(root_option=root_option, value=value):
+                    with patch.object(MODULE, "initialize_vault") as initialize:
+                        code, stdout, stderr = self.run_main(
+                            [root_option, value]
+                        )
+                    self.assertEqual(code, 2)
+                    self.assertEqual(stdout, "")
+                    self.assertIn("requires a path", stderr)
+                    initialize.assert_not_called()
+
+    def test_explicit_root_values_preserve_supported_path_forms(self):
+        cases = (
+            (["--root=-name"], pathlib.Path("-name")),
+            (["--root", "./-name"], pathlib.Path("./-name")),
+            (["-r", "vault with spaces"], pathlib.Path("vault with spaces")),
+            (["--root", "~/vault"], pathlib.Path.home() / "vault"),
+            (["--root", "$OBSIDIAN_TEST_ROOT"], pathlib.Path("expanded vault")),
+        )
+        with patch.dict(os.environ, {"OBSIDIAN_TEST_ROOT": "expanded vault"}):
+            for arguments, expected_root in cases:
+                with self.subTest(arguments=arguments):
+                    self.assertEqual(
+                        MODULE.parse_arguments(["--dry-run", *arguments]),
+                        (expected_root, True, False),
+                    )
 
     def test_new_vault_creates_the_complete_default_directory_tree(self):
         expected_directories = {
@@ -145,10 +195,12 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/work/datalog",
             "sandbox",
             "templates",
+            "templates/gtd",
+            "templates/profiles",
         }
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
 
             self.initialize(root)
 
@@ -192,7 +244,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         }
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
 
             self.initialize(root)
 
@@ -207,7 +259,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_custom_empty_note_directory_receives_gitkeep(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
             empty_directory = root / "notes" / "custom-empty"
             populated_directory = root / "notes" / "custom-populated"
             empty_directory.mkdir(parents=True)
@@ -237,16 +289,156 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             return ()
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            notes_root = pathlib.Path(temporary_directory) / "notes"
+            notes_root = pathlib.Path(temporary_directory).resolve() / "notes"
             notes_root.mkdir()
 
             with patch.object(MODULE.os, "walk", side_effect=simulate_walk):
                 with self.assertRaisesRegex(PermissionError, "scan denial"):
                     MODULE.find_note_subdirectories(notes_root)
 
+    def test_late_directory_conflict_fails_before_any_creation(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            root.mkdir()
+            (root / "templates").write_bytes(b"preserve template conflict\n")
+            self.assert_preflight_failure(root, root, "not a directory")
+
+    def test_file_ancestor_fails_before_any_creation(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            base = pathlib.Path(temporary_directory).resolve()
+            parent = base / "file-parent"
+            parent.write_bytes(b"preserve parent\n")
+            self.assert_preflight_failure(parent / "vault", base, "not a directory")
+
+    def test_gitkeep_conflict_fails_before_any_creation(self):
+        for relative_path in ("notes/custom", "attachments/notes/profiles/hinge"):
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = pathlib.Path(temporary_directory).resolve() / "vault"
+                    conflict = root / relative_path / ".gitkeep"
+                    conflict.mkdir(parents=True)
+                    (conflict / "sentinel").write_bytes(b"preserve\n")
+                    self.assert_preflight_failure(root, root, "not a file")
+
+    def test_note_scan_failure_prevents_all_creations(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            (root / "notes").mkdir(parents=True)
+            with patch.object(
+                MODULE.os, "walk", side_effect=PermissionError("scan denied")
+            ):
+                self.assert_preflight_failure(root, root, "scan denied")
+
+    def test_denied_creation_access_prevents_all_creations(self):
+        for target in ("templates", "notes/custom"):
+            with self.subTest(target=target):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = pathlib.Path(temporary_directory).resolve() / "vault"
+                    blocked = root / target
+                    blocked.mkdir(parents=True)
+                    real_access = MODULE.os.access
+
+                    def check_access(path, mode):
+                        if pathlib.Path(path) == blocked and mode & os.W_OK:
+                            return False
+                        return real_access(path, mode)
+
+                    if target == "templates":
+                        blocked = root
+                    with patch.object(MODULE.os, "access", side_effect=check_access):
+                        self.assert_preflight_failure(root, root, "access")
+
+    def test_complete_read_only_vault_needs_no_write_access(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            self.initialize(root)
+            before = self.snapshot(root)
+            real_access = MODULE.os.access
+
+            def check_access(path, mode):
+                self.assertFalse(mode & os.W_OK)
+                return real_access(path, mode)
+
+            with patch.object(MODULE.os, "access", side_effect=check_access):
+                for dry_run in (True, False):
+                    result, _output = self.initialize(root, dry_run=dry_run)
+                    self.assertEqual(result.directories_created, 0)
+                    self.assertEqual(result.gitkeep_created, 0)
+            self.assertEqual(self.snapshot(root), before)
+
+    def test_disappearing_filesystem_root_raises_instead_of_looping(self):
+        path = pathlib.Path.cwd() / "vault"
+        statuses = [None] * len(path.parents)
+        statuses.append(AssertionError("filesystem root inspected repeatedly"))
+        with patch.object(MODULE, "_read_status", side_effect=statuses):
+            with self.assertRaises(FileNotFoundError):
+                MODULE._require_creation_access(path)
+
+    def test_ancestor_links_are_rejected_before_any_creation(self):
+        for suffix in ("vault", "existing-vault", "../vault"):
+            with self.subTest(suffix=suffix):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    base = pathlib.Path(temporary_directory).resolve()
+                    target = base / "target"
+                    target.mkdir()
+                    (target / "existing-vault").mkdir()
+                    link = base / "linked-parent"
+                    self.create_directory_link(link, target)
+                    try:
+                        self.assert_preflight_failure(
+                            link / suffix, base, "directory link"
+                        )
+                    finally:
+                        self.remove_directory_link(link)
+
+    def test_broken_directory_link_is_rejected_in_dry_run(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            base = pathlib.Path(temporary_directory).resolve()
+            target = base / "target"
+            target.mkdir()
+            link = base / "broken-link"
+            self.create_directory_link(link, target)
+            target.rmdir()
+            try:
+                self.assert_preflight_failure(link / "vault", base, "directory link")
+            finally:
+                self.remove_directory_link(link)
+
+    def test_execution_error_reports_partial_initialization_without_rollback(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            real_mkdir = pathlib.Path.mkdir
+
+            def create_directory(path, *args, **kwargs):
+                if path == root / "templates":
+                    raise PermissionError("simulated write failure")
+                return real_mkdir(path, *args, **kwargs)
+
+            with patch.object(pathlib.Path, "mkdir", new=create_directory):
+                code, stdout, stderr = self.run_main(["--root", str(root)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("simulated write failure", stderr)
+            self.assertIn("partial", stderr)
+            self.assertNotIn("Completed:", stdout)
+            self.assertTrue((root / "notes").is_dir())
+
+    def test_missing_root_ancestors_are_planned_and_created(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            base = pathlib.Path(temporary_directory).resolve()
+            root = base / "missing" / "parent" / "vault"
+            plan, output = self.initialize(root, dry_run=True)
+            self.assertFalse((base / "missing").exists())
+            self.assertIn(f"CREATE  {base / 'missing'}\n", output)
+            self.assertIn(f"CREATE  {base / 'missing' / 'parent'}\n", output)
+            result, _output = self.initialize(root)
+            self.assertEqual(result.directories_created, plan.directories_planned)
+            self.assertEqual(result.gitkeep_created, plan.gitkeep_planned)
+            self.assertTrue(root.is_dir())
+
     def test_dry_run_plans_directories_and_gitkeep_files_without_writes(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
 
             exit_code, stdout, stderr = self.run_main(
                 ["--dry-run", "--root", str(root)]
@@ -264,13 +456,13 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertFalse(root_exists)
         self.assertEqual(len(gitkeep_plan_lines), 27)
         self.assertIn(
-            "Dry-run completed: 45 directories would be created; "
+            "Dry-run completed: 47 directories would be created; "
             "0 directories already exist; 27 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
 
-    def test_dry_run_matches_the_current_vault_shape(self):
+    def test_dry_run_on_a_partially_populated_vault_preserves_all_entries(self):
         existing_leaf_directories = (
             "archive",
             "attachments",
@@ -291,7 +483,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
 
             for relative_path in existing_leaf_directories:
                 (root / relative_path).mkdir(parents=True)
@@ -312,7 +504,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 22 directories would be created; "
+            "Dry-run completed: 24 directories would be created; "
             "23 directories already exist; 26 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
@@ -321,7 +513,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_repeated_runs_are_idempotent_and_report_separate_counts(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
 
             first_code, first_stdout, first_stderr = self.run_main(
                 ["--root", str(root)]
@@ -342,13 +534,13 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 45 directories created; 0 directories already "
+            "Completed: 47 directories created; 0 directories already "
             "existed; 27 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 45 directories already "
+            "Completed: 0 directories created; 47 directories already "
             "existed; 0 .gitkeep files created; 27 .gitkeep files already "
             "existed."
         )
@@ -359,7 +551,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_system_directories_and_existing_files_are_preserved(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
             sentinel_paths = []
 
             for directory_name in (".githooks", ".github", ".obsidian"):
@@ -400,7 +592,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         for filename, content, should_create in cases:
             with self.subTest(filename=filename):
                 with tempfile.TemporaryDirectory() as temporary_directory:
-                    root = pathlib.Path(temporary_directory) / "vault"
+                    root = pathlib.Path(temporary_directory).resolve() / "vault"
                     hinge = (
                         root / "attachments" / "notes" / "profiles" / "hinge"
                     )
@@ -449,7 +641,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         for relative_path, expected_created in cases:
             with self.subTest(relative_path=relative_path):
                 with tempfile.TemporaryDirectory() as temporary_directory:
-                    root = pathlib.Path(temporary_directory) / "vault"
+                    root = pathlib.Path(temporary_directory).resolve() / "vault"
                     directory = root / relative_path
                     directory.mkdir(parents=True)
                     gitkeep_path = directory / ".gitkeep"
@@ -476,7 +668,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                     relative_path=relative_path, dry_run=dry_run
                 ):
                     with tempfile.TemporaryDirectory() as temporary_directory:
-                        root = pathlib.Path(temporary_directory) / "vault"
+                        root = pathlib.Path(temporary_directory).resolve() / "vault"
                         conflict_path = root / relative_path / ".gitkeep"
                         conflict_path.mkdir(parents=True)
                         sentinel_path = conflict_path / "sentinel.bin"
@@ -501,7 +693,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_directory_link_is_not_followed_for_gitkeep_creation(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = pathlib.Path(temporary_directory)
+            temporary_root = pathlib.Path(temporary_directory).resolve()
             root = temporary_root / "vault"
             notes_root = root / "notes"
             notes_root.mkdir(parents=True)
@@ -520,6 +712,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_managed_directory_link_returns_error_without_target_writes(self):
         relative_paths = (
+            "",
             "notes",
             "notes/devtools/github/repositories",
             "notes/profiles",
@@ -534,31 +727,35 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                     relative_path=relative_path, dry_run=dry_run
                 ):
                     with tempfile.TemporaryDirectory() as temporary_directory:
-                        temporary_root = pathlib.Path(temporary_directory)
+                        temporary_root = pathlib.Path(temporary_directory).resolve()
                         root = temporary_root / "vault"
                         link_target = temporary_root / "external-directory"
                         link_target.mkdir()
                         sentinel_path = link_target / "sentinel.md"
                         sentinel_path.write_bytes(b"preserve linked target\n")
                         directory_link = root / relative_path
-                        directory_link.parent.mkdir(parents=True)
+                        directory_link.parent.mkdir(parents=True, exist_ok=True)
                         self.create_directory_link(directory_link, link_target)
                         before_snapshot = self.snapshot(link_target)
+                        before_vault_snapshot = self.snapshot(temporary_root)
                         arguments = ["--root", str(root)]
                         if dry_run:
                             arguments.append("--dry-run")
 
                         try:
-                            exit_code, _stdout, stderr = self.run_main(
+                            exit_code, stdout, stderr = self.run_main(
                                 arguments
                             )
                             after_snapshot = self.snapshot(link_target)
+                            after_vault_snapshot = self.snapshot(temporary_root)
                         finally:
                             self.remove_directory_link(directory_link)
 
                     self.assertEqual(exit_code, 1)
+                    self.assertEqual(stdout, "")
                     self.assertIn("directory link", stderr)
                     self.assertEqual(after_snapshot, before_snapshot)
+                    self.assertEqual(after_vault_snapshot, before_vault_snapshot)
 
 
 if __name__ == "__main__":

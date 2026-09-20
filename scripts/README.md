@@ -8,6 +8,8 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `<racine-du-Vault>/`                            | Répertoire racine du Vault et point d'ancrage de tous les autres répertoires créés par le programme                       |
 | `templates/`                                    | Modèles Markdown réutilisables servant à créer des notes homogènes dans le Vault                                          |
+| `templates/gtd/`                                | Modèles pour les listes et revues GTD                                                                                     |
+| `templates/profiles/`                           | Modèles pour les notes de profils                                                                                         |
 | `notes/`                                        | Racine principale des notes actives, organisées par domaine, usage ou sujet                                               |
 | `notes/inbox/`                                  | Notes capturées rapidement et conservées temporairement avant leur classement définitif                                   |
 | `notes/fintech/`                                | Notes consacrées à la FinTech et aux sujets bancaires ou financiers associés                                              |
@@ -60,3 +62,32 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 `attachments/notes/profiles/hinge/`, reçoivent un `.gitkeep` vide. Les autres
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
+
+Un Vault neuf comprend 47 répertoires, racine comprise, et 27 fichiers
+`.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
+ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
+
+Les options `--root` et `-r` exigent un chemin. Une autre option placée à la
+suite est refusée. Pour un chemin commençant par un tiret, utiliser
+`--root=-nom` ou `--root ./-nom`.
+
+La simulation et l'initialisation partagent une prévalidation complète avant
+toute création : types des chemins, ancêtres de la racine, accès observables,
+lecture des sous-répertoires de notes et types des `.gitkeep`. Les liens
+symboliques et les points de réanalyse Windows sont refusés dans les chemins
+gérés et leurs ancêtres, même si leur cible est absente. Les sous-répertoires
+personnalisés liés sous `notes/` sont ignorés. Un `.gitkeep` déjà présent doit être
+un fichier ordinaire ; les liens et autres types sont refusés.
+
+Les ancêtres manquants nécessaires à la racine sont affichés dans la simulation
+et créés lors de l'initialisation, mais ne sont pas inclus dans les compteurs
+des répertoires du Vault. Aucun accès en écriture n'est exigé si aucune création
+n'est nécessaire.
+
+Le mode `--dry-run` n'écrit aucun fichier de test des permissions. Les contrôles
+d'accès ne garantissent pas la réussite des écritures ultérieures : une panne,
+un changement de permissions ou une modification concurrente peut interrompre
+l'exécution. Le programme signale alors un résultat potentiellement partiel,
+sans annuler les créations déjà effectuées. Les codes de sortie sont `0` en cas
+de réussite, `1` pour une erreur d'initialisation et `2` pour des arguments
+invalides.

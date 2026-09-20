@@ -568,12 +568,18 @@ optional, deferred, or explicitly excluded from this repository.
   directories and files are preserved, repeated execution is idempotent, and
   omitted roots use `G:\Mon Drive\obsidian-vault` on Windows or `~/Obsidian`
   elsewhere. The managed tree includes GitHub repository notes, profile notes,
-  and Hinge profile attachments. The tool creates zero-byte `.gitkeep` files
+  Hinge profile attachments, and GTD and profile template directories. A new
+  vault contains 47 directories including its root and 27 `.gitkeep` files.
+  The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and
   `.gitkeep` outcomes separately, refuses to follow directory links or
-  Windows reparse points, and does not manage system directories such as `.githooks/`, `.github/`,
+  Windows reparse points in managed directories or their ancestors, and does
+  not manage system directories such as `.githooks/`, `.github/`,
   `.GitHub/`, or `.obsidian/`.
+  Simulation and execution share a complete preflight before any creation;
+  later write failures report potentially partial initialization without
+  rollback. No write access is required when there are no planned creations.
 
 ### `tools/`
 
@@ -726,7 +732,9 @@ optional, deferred, or explicitly excluded from this repository.
 - Goal: Verifies the default vault tree, recursive note `.gitkeep` creation,
   Hinge attachment `.gitkeep` creation and preservation,
   side-effect-free dry runs, system-directory isolation, data preservation,
-  error handling, and repeated-execution idempotence.
+  argument validation, ancestor and broken-link rejection, preflight failures
+  without writes, partial-execution diagnostics, and repeated-execution
+  idempotence.
 - Usage: Run
   `python -B -m unittest tests.test_initialize_obsidian_vault_structure`.
 - Notes: Uses only `unittest` and the Python standard library, isolates writes
