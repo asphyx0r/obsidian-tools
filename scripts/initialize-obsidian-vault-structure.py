@@ -16,6 +16,9 @@ SCRIPT_VERSION: Final[str] = "1.0.0"
 
 WINDOWS_DEFAULT_ROOT: Final[Path] = Path(r"G:\Mon Drive\obsidian-vault")
 LINUX_DEFAULT_ROOT: Final[Path] = Path.home() / "Obsidian"
+HINGE_ATTACHMENTS_DIRECTORY: Final[Path] = Path(
+    "attachments", "notes", "profiles", "hinge"
+)
 
 RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes"),
@@ -27,6 +30,7 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "tasks", "backlogs"),
     Path("notes", "tasks", "recurring"),
     Path("notes", "recipes"),
+    Path("notes", "profiles"),
     Path("notes", "books"),
     Path("notes", "books", "specifications"),
     Path("notes", "fintech"),
@@ -42,6 +46,7 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "devtools", "claude"),
     Path("notes", "devtools", "git"),
     Path("notes", "devtools", "github"),
+    Path("notes", "devtools", "github", "repositories"),
     Path("notes", "devtools", "vscode"),
     Path("notes", "devtools", "tmux"),
     Path("notes", "devtools", "psmux"),
@@ -53,6 +58,9 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "hobbies", "graffiti"),
     Path("templates"),
     Path("attachments"),
+    Path("attachments", "notes"),
+    Path("attachments", "notes", "profiles"),
+    HINGE_ATTACHMENTS_DIRECTORY,
     Path("archive"),
     Path("archive", "tasks"),
     Path("archive", "goals"),
@@ -257,11 +265,11 @@ def get_note_subdirectories(vault_root: Path) -> tuple[Path, ...]:
     return tuple(sorted(directories, key=lambda path: str(path).casefold()))
 
 
-def uses_directory_link(path: Path, notes_root: Path) -> bool:
+def uses_directory_link(path: Path, vault_root: Path) -> bool:
     """Return whether path is or is below a symbolic directory link."""
     current_path = path
 
-    while current_path != notes_root:
+    while current_path != vault_root:
         if is_directory_link(current_path):
             return True
 
@@ -271,15 +279,17 @@ def uses_directory_link(path: Path, notes_root: Path) -> bool:
 
 
 def ensure_gitkeep_files(vault_root: Path, dry_run: bool) -> tuple[int, int, int]:
-    """Ensure that empty note subdirectories contain a .gitkeep file."""
+    """Ensure empty note subdirectories and Hinge contain .gitkeep files."""
     created_count = 0
     existing_count = 0
     planned_count = 0
-    notes_root = vault_root / "notes"
-    directories = get_note_subdirectories(vault_root)
+    directories = (
+        *get_note_subdirectories(vault_root),
+        vault_root / HINGE_ATTACHMENTS_DIRECTORY,
+    )
 
     for directory in directories:
-        if uses_directory_link(directory, notes_root):
+        if uses_directory_link(directory, vault_root):
             continue
 
         gitkeep_path = directory / ".gitkeep"

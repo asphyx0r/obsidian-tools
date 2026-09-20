@@ -105,6 +105,9 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "archive/goals",
             "archive/tasks",
             "attachments",
+            "attachments/notes",
+            "attachments/notes/profiles",
+            "attachments/notes/profiles/hinge",
             "notes",
             "notes/books",
             "notes/books/specifications",
@@ -118,6 +121,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/codex",
             "notes/devtools/git",
             "notes/devtools/github",
+            "notes/devtools/github/repositories",
             "notes/devtools/vscode",
             "notes/devtools/tmux",
             "notes/devtools/psmux",
@@ -129,6 +133,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/goals",
             "notes/gtd",
             "notes/inbox",
+            "notes/profiles",
             "notes/recipes",
             "notes/projects",
             "notes/projects/prompts-source-control",
@@ -155,8 +160,9 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
         self.assertEqual(actual_directories, expected_directories)
 
-    def test_new_vault_creates_gitkeep_files_in_empty_note_leaves(self):
+    def test_new_vault_creates_gitkeep_files_in_selected_empty_leaves(self):
         expected_gitkeep_files = {
+            "attachments/notes/profiles/hinge/.gitkeep",
             "notes/books/specifications/.gitkeep",
             "notes/code/bash/.gitkeep",
             "notes/code/powershell/.gitkeep",
@@ -165,7 +171,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/claude/.gitkeep",
             "notes/devtools/codex/.gitkeep",
             "notes/devtools/git/.gitkeep",
-            "notes/devtools/github/.gitkeep",
+            "notes/devtools/github/repositories/.gitkeep",
             "notes/devtools/vscode/.gitkeep",
             "notes/devtools/tmux/.gitkeep",
             "notes/devtools/psmux/.gitkeep",
@@ -176,6 +182,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/hobbies/magic-the-gathering/.gitkeep",
             "notes/hobbies/warhammer/.gitkeep",
             "notes/inbox/.gitkeep",
+            "notes/profiles/.gitkeep",
             "notes/recipes/.gitkeep",
             "notes/projects/prompts-source-control/.gitkeep",
             "notes/tasks/backlogs/.gitkeep",
@@ -196,7 +203,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             gitkeep_contents = [path.read_bytes() for path in gitkeep_files]
 
         self.assertEqual(actual_gitkeep_files, expected_gitkeep_files)
-        self.assertEqual(gitkeep_contents, [b""] * 25)
+        self.assertEqual(gitkeep_contents, [b""] * 27)
 
     def test_custom_empty_note_directory_receives_gitkeep(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -255,10 +262,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertFalse(root_exists)
-        self.assertEqual(len(gitkeep_plan_lines), 25)
+        self.assertEqual(len(gitkeep_plan_lines), 27)
         self.assertIn(
-            "Dry-run completed: 40 directories would be created; "
-            "0 directories already exist; 25 .gitkeep files would be "
+            "Dry-run completed: 45 directories would be created; "
+            "0 directories already exist; 27 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -305,8 +312,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 17 directories would be created; "
-            "23 directories already exist; 24 .gitkeep files would be "
+            "Dry-run completed: 22 directories would be created; "
+            "23 directories already exist; 26 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -335,14 +342,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 40 directories created; 0 directories already "
-            "existed; 25 .gitkeep files created; 0 .gitkeep files already "
+            "Completed: 45 directories created; 0 directories already "
+            "existed; 27 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 40 directories already "
-            "existed; 0 .gitkeep files created; 25 .gitkeep files already "
+            "Completed: 0 directories created; 45 directories already "
+            "existed; 0 .gitkeep files created; 27 .gitkeep files already "
             "existed."
         )
         self.assertIn(repeated_summary, second_stdout)
@@ -383,41 +390,114 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(after_contents, before_contents)
         self.assertEqual(system_gitkeep_files, [])
 
+    def test_hinge_gitkeep_plan_matches_execution(self):
+        cases = (
+            (None, None, True),
+            ("profile.png", b"preserve attachment\n", False),
+            (".gitkeep", b"preserve existing gitkeep\n", False),
+        )
+
+        for filename, content, should_create in cases:
+            with self.subTest(filename=filename):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = pathlib.Path(temporary_directory) / "vault"
+                    hinge = (
+                        root / "attachments" / "notes" / "profiles" / "hinge"
+                    )
+                    hinge.mkdir(parents=True)
+                    unrelated = root / "attachments" / "custom-empty"
+                    unrelated.mkdir()
+                    if filename is not None:
+                        (hinge / filename).write_bytes(content)
+                    before_snapshot = self.snapshot(root)
+
+                    exit_code, stdout, stderr = self.run_main(
+                        ["--dry-run", "--root", str(root)]
+                    )
+
+                    self.assertEqual(exit_code, 0)
+                    self.assertEqual(stderr, "")
+                    self.assertEqual(self.snapshot(root), before_snapshot)
+                    plan_line = f"CREATE  {hinge / '.gitkeep'}"
+                    self.assertEqual(
+                        plan_line in stdout.splitlines(), should_create
+                    )
+
+                    self.initialize(root)
+
+                    if should_create:
+                        self.assertEqual(
+                            (hinge / ".gitkeep").read_bytes(), b""
+                        )
+                    elif filename == "profile.png":
+                        self.assertFalse((hinge / ".gitkeep").exists())
+                    if filename is not None:
+                        self.assertEqual(
+                            (hinge / filename).read_bytes(), content
+                        )
+                    self.assertFalse((unrelated / ".gitkeep").exists())
+                    for parent in (hinge.parent, hinge.parent.parent):
+                        self.assertFalse((parent / ".gitkeep").exists())
+
     def test_existing_gitkeep_file_is_counted_without_being_modified(self):
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
-            custom_directory = root / "notes" / "custom"
-            custom_directory.mkdir(parents=True)
-            gitkeep_path = custom_directory / ".gitkeep"
-            gitkeep_path.write_bytes(b"preserve existing content\n")
+        cases = (
+            ("notes/custom", 27),
+            ("notes/devtools/github", 27),
+            ("attachments/notes/profiles/hinge", 26),
+        )
 
-            result, _output = self.initialize(root)
+        for relative_path, expected_created in cases:
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = pathlib.Path(temporary_directory) / "vault"
+                    directory = root / relative_path
+                    directory.mkdir(parents=True)
+                    gitkeep_path = directory / ".gitkeep"
+                    gitkeep_path.write_bytes(b"preserve existing content\n")
 
-            gitkeep_contents = gitkeep_path.read_bytes()
+                    result, _output = self.initialize(root)
 
-        self.assertEqual(gitkeep_contents, b"preserve existing content\n")
-        self.assertEqual(result.gitkeep_created, 25)
-        self.assertEqual(result.gitkeep_existing, 1)
+                    gitkeep_contents = gitkeep_path.read_bytes()
+
+                self.assertEqual(
+                    gitkeep_contents, b"preserve existing content\n"
+                )
+                self.assertEqual(result.gitkeep_created, expected_created)
+                self.assertEqual(result.gitkeep_existing, 1)
 
     def test_gitkeep_directory_conflict_returns_error_without_overwrite(self):
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = pathlib.Path(temporary_directory) / "vault"
-            conflict_path = root / "notes" / "custom" / ".gitkeep"
-            conflict_path.mkdir(parents=True)
-            sentinel_path = conflict_path / "sentinel.bin"
-            sentinel_path.write_bytes(b"conflict sentinel\n")
+        relative_paths = (
+            "notes/custom",
+            "attachments/notes/profiles/hinge",
+        )
+        for relative_path in relative_paths:
+            for dry_run in (False, True):
+                with self.subTest(
+                    relative_path=relative_path, dry_run=dry_run
+                ):
+                    with tempfile.TemporaryDirectory() as temporary_directory:
+                        root = pathlib.Path(temporary_directory) / "vault"
+                        conflict_path = root / relative_path / ".gitkeep"
+                        conflict_path.mkdir(parents=True)
+                        sentinel_path = conflict_path / "sentinel.bin"
+                        sentinel_path.write_bytes(b"conflict sentinel\n")
+                        before_snapshot = self.snapshot(root)
+                        arguments = ["--root", str(root)]
+                        if dry_run:
+                            arguments.append("--dry-run")
 
-            exit_code, _stdout, stderr = self.run_main(
-                ["--root", str(root)]
-            )
+                        exit_code, _stdout, stderr = self.run_main(arguments)
 
-            conflict_is_directory = conflict_path.is_dir()
-            sentinel_contents = sentinel_path.read_bytes()
-
-        self.assertEqual(exit_code, 1)
-        self.assertIn("exists but is not a file", stderr)
-        self.assertTrue(conflict_is_directory)
-        self.assertEqual(sentinel_contents, b"conflict sentinel\n")
+                        self.assertEqual(exit_code, 1)
+                        self.assertIn("exists but is not a file", stderr)
+                        self.assertTrue(conflict_path.is_dir())
+                        self.assertEqual(
+                            sentinel_path.read_bytes(), b"conflict sentinel\n"
+                        )
+                        if dry_run:
+                            self.assertEqual(
+                                self.snapshot(root), before_snapshot
+                            )
 
     def test_directory_link_is_not_followed_for_gitkeep_creation(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -439,29 +519,46 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertFalse(target_gitkeep_exists)
 
     def test_managed_directory_link_returns_error_without_target_writes(self):
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = pathlib.Path(temporary_directory)
-            root = temporary_root / "vault"
-            root.mkdir()
-            link_target = temporary_root / "external-notes"
-            link_target.mkdir()
-            sentinel_path = link_target / "sentinel.md"
-            sentinel_path.write_bytes(b"preserve linked target\n")
-            notes_link = root / "notes"
-            self.create_directory_link(notes_link, link_target)
-            before_snapshot = self.snapshot(link_target)
+        relative_paths = (
+            "notes",
+            "notes/devtools/github/repositories",
+            "notes/profiles",
+            "attachments/notes",
+            "attachments/notes/profiles",
+            "attachments/notes/profiles/hinge",
+        )
 
-            try:
-                exit_code, _stdout, stderr = self.run_main(
-                    ["--root", str(root)]
-                )
-                after_snapshot = self.snapshot(link_target)
-            finally:
-                self.remove_directory_link(notes_link)
+        for relative_path in relative_paths:
+            for dry_run in (False, True):
+                with self.subTest(
+                    relative_path=relative_path, dry_run=dry_run
+                ):
+                    with tempfile.TemporaryDirectory() as temporary_directory:
+                        temporary_root = pathlib.Path(temporary_directory)
+                        root = temporary_root / "vault"
+                        link_target = temporary_root / "external-directory"
+                        link_target.mkdir()
+                        sentinel_path = link_target / "sentinel.md"
+                        sentinel_path.write_bytes(b"preserve linked target\n")
+                        directory_link = root / relative_path
+                        directory_link.parent.mkdir(parents=True)
+                        self.create_directory_link(directory_link, link_target)
+                        before_snapshot = self.snapshot(link_target)
+                        arguments = ["--root", str(root)]
+                        if dry_run:
+                            arguments.append("--dry-run")
 
-        self.assertEqual(exit_code, 1)
-        self.assertIn("directory link", stderr)
-        self.assertEqual(after_snapshot, before_snapshot)
+                        try:
+                            exit_code, _stdout, stderr = self.run_main(
+                                arguments
+                            )
+                            after_snapshot = self.snapshot(link_target)
+                        finally:
+                            self.remove_directory_link(directory_link)
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertIn("directory link", stderr)
+                    self.assertEqual(after_snapshot, before_snapshot)
 
 
 if __name__ == "__main__":

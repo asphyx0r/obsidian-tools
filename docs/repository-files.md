@@ -567,10 +567,12 @@ optional, deferred, or explicitly excluded from this repository.
 - Notes: Requires Python 3.10 or later and no third-party package. Existing
   directories and files are preserved, repeated execution is idempotent, and
   omitted roots use `G:\Mon Drive\obsidian-vault` on Windows or `~/Obsidian`
-  elsewhere. The tool creates zero-byte `.gitkeep` files in empty
-  subdirectories below `notes/`, reports directory and `.gitkeep` outcomes
-  separately, refuses to follow directory links or Windows reparse points, and
-  does not manage system directories such as `.githooks/`, `.github/`,
+  elsewhere. The managed tree includes GitHub repository notes, profile notes,
+  and Hinge profile attachments. The tool creates zero-byte `.gitkeep` files
+  in empty subdirectories below `notes/` and in the empty
+  `attachments/notes/profiles/hinge/` directory. It reports directory and
+  `.gitkeep` outcomes separately, refuses to follow directory links or
+  Windows reparse points, and does not manage system directories such as `.githooks/`, `.github/`,
   `.GitHub/`, or `.obsidian/`.
 
 ### `tools/`
@@ -721,7 +723,8 @@ optional, deferred, or explicitly excluded from this repository.
 
 - Type: `file`
 - Status: `required`
-- Goal: Verifies the default vault tree, recursive `.gitkeep` creation,
+- Goal: Verifies the default vault tree, recursive note `.gitkeep` creation,
+  Hinge attachment `.gitkeep` creation and preservation,
   side-effect-free dry runs, system-directory isolation, data preservation,
   error handling, and repeated-execution idempotence.
 - Usage: Run

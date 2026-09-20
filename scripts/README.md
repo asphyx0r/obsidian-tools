@@ -31,6 +31,7 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/devtools/claude/`                        | Notes, références et procédures consacrées à Claude                                                                       |
 | `notes/devtools/git/`                           | Notes, références et procédures consacrées à Git                                                                          |
 | `notes/devtools/github/`                        | Notes, références et procédures consacrées à GitHub                                                                       |
+| `notes/devtools/github/repositories/`           | Notes et documentation consacrées aux dépôts GitHub                                                                       |
 | `notes/devtools/vscode/`                        | Notes, références et procédures consacrées à Visual Studio Code                                                           |
 | `notes/devtools/tmux/`                          | Notes, références et procédures consacrées à tmux                                                                         |
 | `notes/devtools/psmux/`                         | Notes, références et procédures consacrées à psmux                                                                        |
@@ -39,9 +40,13 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/tasks/backlogs/`                         | Tâches, idées ou actions actives mais non planifiées, à prioriser ou traiter ultérieurement                               |
 | `notes/tasks/recurring/`                        | Tâches répétitives définies avec une cadence ou une règle de récurrence                                                   |
 | `notes/recipes/`                                | Recettes de cuisine conservées dans le Vault                                                                              |
+| `notes/profiles/`                               | Notes consacrées aux profils                                                                                              |
 | `notes/goals/`                                  | Notes consacrées aux objectifs actuellement envisagés ou poursuivis                                                       |
 | `notes/gtd/`                                    | Fichiers de tri GTD                                                                                                       |
 | `attachments/`                                  | Images, documents et autres fichiers joints référencés par les notes du Vault                                             |
+| `attachments/notes/`                            | Pièces jointes associées aux notes                                                                                        |
+| `attachments/notes/profiles/`                   | Pièces jointes associées aux notes de profils                                                                             |
+| `attachments/notes/profiles/hinge/`             | Pièces jointes associées aux profils Hinge                                                                                |
 | `archive/`                                      | Racine des contenus qui ne sont plus actifs mais doivent être conservés pour leur historique ou leur consultation         |
 | `archive/tasks/`                                | Tâches terminées, abandonnées, annulées ou devenues obsolètes, retirées des listes actives                                |
 | `archive/goals/`                                | Objectifs qui ne sont plus actifs, afin de conserver leur historique sans encombrer les objectifs courants                |
@@ -50,3 +55,8 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 Dans `notes/gtd/`, les fichiers `next-actions.md`, `waiting-for.md`, `someday.md`
 et `weekly-review.md` sont à créer par l'utilisateur. Le programme crée uniquement
 le répertoire et son `.gitkeep` s'il est vide.
+
+Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
+`attachments/notes/profiles/hinge/`, reçoivent un `.gitkeep` vide. Les autres
+répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
+existants, y compris les `.gitkeep`, sont conservés sans modification.

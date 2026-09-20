@@ -9,7 +9,8 @@ so the command can be run again safely when the vault structure already exists.
 - Creates the repository's standard notes, templates, attachments, archive,
   and sandbox directories.
 - Adds a zero-byte `.gitkeep` file to every empty subdirectory below `notes/`,
-  including empty custom subdirectories found at runtime.
+  including empty custom subdirectories found at runtime, and to the empty
+  `attachments/notes/profiles/hinge/` directory.
 - Supports a side-effect-free `--dry-run` preview.
 - Accepts an explicit vault root on Windows, Linux, and macOS.
 - Reports directory and `.gitkeep` outcomes separately.
@@ -60,6 +61,7 @@ notes/
 |   |-- backlogs/
 |   `-- recurring/
 |-- recipes/
+|-- profiles/
 |-- books/
 |   `-- specifications/
 |-- fintech/
@@ -75,6 +77,7 @@ notes/
 |   |-- claude/
 |   |-- git/
 |   |-- github/
+|   |   `-- repositories/
 |   |-- vscode/
 |   |-- tmux/
 |   `-- psmux/
@@ -87,9 +90,11 @@ notes/
 ```
 
 It also creates the top-level `templates/`, `attachments/`, `archive/`, and
-`sandbox/` directories, including `archive/tasks/` and `archive/goals/`. Empty
-subdirectories below `notes/` receive a zero-byte `.gitkeep`; existing files
-and existing `.gitkeep` contents are never modified. Directory links and
+`sandbox/` directories, including `archive/tasks/`, `archive/goals/`, and
+`attachments/notes/profiles/hinge/` with its parents. Empty subdirectories below
+`notes/` and the empty Hinge directory receive a zero-byte `.gitkeep`. Other
+attachment directories do not receive `.gitkeep` files. Existing files and
+existing `.gitkeep` contents are never modified. Directory links and
 Windows reparse points are not followed. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
