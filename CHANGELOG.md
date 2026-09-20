@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.5.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 5553b50 | fix(tools): classify terminal notes separately | asphyx |
+| 0d1b302 | feat(tools): add general AI ChatGPT notes | asphyx |
+
 ## v2.4.1
 
 | References | Description | Author(s) |
