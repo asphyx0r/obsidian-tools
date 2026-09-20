@@ -2,6 +2,14 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.4.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 22668c8 | feat(tools): add repository and profile paths | asphyx |
+| 96cb249 | feat(tools): add GTD notes directory | asphyx |
+| a2bad5e | docs(readme): document vault directories | asphyx |
+
 ## v2.3.0
 
 | References | Description | Author(s) |
