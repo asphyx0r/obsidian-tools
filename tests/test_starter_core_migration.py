@@ -20,13 +20,13 @@ class StarterCoreMigrationTests(unittest.TestCase):
         self.assertTrue(path.is_file(), "Application validation must be declared")
         return json.loads(path.read_text(encoding="utf-8"))
 
-    def test_existing_release_and_automation_behavior_is_preserved(self):
+    def test_selected_release_and_automation_policy(self):
         config = self.configuration()
         self.assertEqual(config["repositoryRole"], "project")
         self.assertEqual(config["releaseKind"], "deployment")
         self.assertEqual(
             config["automations"],
-            {"agentRulesSync": True, "guardedMerge": True, "releasePreflight": True},
+            {"agentRulesSync": False, "guardedMerge": True, "releasePreflight": True},
         )
 
     def test_application_suite_runs_on_both_supported_platforms(self):

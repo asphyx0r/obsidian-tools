@@ -1009,3 +1009,11 @@ Their adoption and adaptations are documented in
 | `tools/repository-audit/security.sh` | Provides a module of the distributed audit and hook implementation. |
 | `tools/repository-audit/smoke.sh` | Provides a module of the distributed audit and hook implementation. |
 | `tools/repository-audit/workflow-contracts.py` | Provides a module of the distributed audit and hook implementation. |
+
+## CI maintenance additions
+
+| File | Purpose |
+| --- | --- |
+| `docs/ci-maintenance.md` | Documents dependency updates, all-branch validation and local core adaptations. |
+| `tests/test_guarded_merge_checks.py` | Verifies required checks and immutable PR heads before guarded merges. |
+| `tests/test_ci_maintenance.py` | Verifies dependency drift rejection and retained workflow security boundaries. |

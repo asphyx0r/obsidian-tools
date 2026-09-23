@@ -977,8 +977,7 @@ def repository_audit_contract(node_version: str) -> dict:
             },
             "push": {
                 "branches": [
-                    "master",
-                    "codex/release-preflight-*",
+                    "**",
                 ],
                 "tags": [
                     "v*",
@@ -1068,7 +1067,9 @@ def repository_audit_contract(node_version: str) -> dict:
                             python tools/quality/install-external-tools.py `
                               --platform windows-x64 `
                               --tool PSScriptAnalyzer `
+                              --tool shfmt --tool shellcheck `
                               --install-root "$env:RUNNER_TEMP/quality-tools"
+                            Add-Content $env:GITHUB_PATH "$env:RUNNER_TEMP/quality-tools/bin"
                             Add-Content $env:GITHUB_ENV `
                               "PSModulePath=$env:RUNNER_TEMP/quality-tools/Modules$([IO.Path]::PathSeparator)$env:PSModulePath"
                             """).strip(),
@@ -1116,7 +1117,6 @@ def repository_audit_contract(node_version: str) -> dict:
         },
     }
 
-    result["on"]["push"]["branches"].insert(0, "main")
     result["on"]["pull_request"]["branches"].insert(0, "main")
     jobs = result["jobs"]
     jobs["activation"] = activation_contract("releasePreflight")
@@ -1169,6 +1169,26 @@ def repository_audit_contract(node_version: str) -> dict:
                 checkout(ref="${{ github.event.pull_request.head.sha || github.sha }}"),
                 audit_revision_step(),
                 setup_python(version, None),
+                action("setup-node", {"node-version": "${{ env.NODE_VERSION }}"}),
+                {
+                    "shell": "bash",
+                    "run": textwrap.dedent(r"""
+                        python -m pip install --disable-pip-version-check \
+                          --require-hashes --requirement tools/quality/requirements.lock
+                        npm ci --ignore-scripts --prefix tools/quality
+                        """).strip(),
+                },
+                {
+                    "shell": "bash",
+                    "run": textwrap.dedent(r"""
+                        platform=linux-x64
+                        if [[ "$RUNNER_OS" == Windows ]]; then platform=windows-x64; fi
+                        python tools/quality/install-external-tools.py \
+                          --platform "$platform" --tool shfmt --tool shellcheck \
+                          --install-root "$RUNNER_TEMP/project-quality-tools"
+                        echo "$RUNNER_TEMP/project-quality-tools/bin" >> "$GITHUB_PATH"
+                        """).strip(),
+                },
                 {
                     "shell": "bash",
                     "run": "python -B tools/project_validation.py --repository-root . --timeout 900",

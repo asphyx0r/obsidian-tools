@@ -3,11 +3,24 @@
   "repositoryRole": "project",
   "releaseKind": "deployment",
   "automations": {
-    "agentRulesSync": true,
+    "agentRulesSync": false,
     "guardedMerge": true,
     "releasePreflight": true
   },
   "checks": [
+    {
+      "name": "Quality dependency coherence",
+      "argv": [
+        "python",
+        "-B",
+        "tools/quality/check-versions.py"
+      ],
+      "workingDirectory": ".",
+      "platforms": [
+        "linux",
+        "windows"
+      ]
+    },
     {
       "name": "Python application and compatibility tests",
       "argv": [

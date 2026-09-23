@@ -4,11 +4,20 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(tools)"
+      prefix-development: "chore(tools)"
   - package-ecosystem: "pip"
     directory: "/tools/quality"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(tools)"
+      prefix-development: "chore(tools)"
   - package-ecosystem: "npm"
     directory: "/tools/quality"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(tools)"
+      prefix-development: "chore(tools)"
