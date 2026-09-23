@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.5.1
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 705d724 | fix(ci): align checks and dependency updates | asphyx |
+| c4ff722 | chore(tools): adopt starter kit v2.11.2 | asphyx |
+
 ## v2.5.0
 
 | References | Description | Author(s) |
