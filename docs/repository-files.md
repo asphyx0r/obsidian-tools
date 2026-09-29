@@ -564,8 +564,10 @@ optional, deferred, or explicitly excluded from this repository.
   `notes/ai/chatgpt/` covers ChatGPT usage outside programming and development,
   while `notes/devtools/` covers tools primarily used in development.
   `notes/terminal/` covers terminals, command entry, and CLI tools, with
-  `tmux/` and `psmux/` subdirectories. A new vault contains 50 directories
-  including its root and 28 `.gitkeep` files.
+  `tmux/` and `psmux/` subdirectories. The managed tree also includes
+  `notes/gtd/weekly-schedules/` and `notes/health/nutrition/` with its parent
+  `notes/health/`. A new vault contains 53 directories
+  including its root and 29 `.gitkeep` files.
   The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and

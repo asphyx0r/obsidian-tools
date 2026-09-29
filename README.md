@@ -74,6 +74,9 @@ notes/
 |-- inbox/
 |-- goals/
 |-- gtd/
+|   `-- weekly-schedules/
+|-- health/
+|   `-- nutrition/
 |-- tasks/
 |   |-- daily/
 |   |-- backlogs/
@@ -128,7 +131,7 @@ Windows reparse points in the root, its ancestors, or managed directories are
 rejected; linked custom note directories are skipped. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
-A new vault contains 50 directories including its root and 28 empty
+A new vault contains 53 directories including its root and 29 empty
 `.gitkeep` files. The initializer does not create notes, template contents,
 or attachments; the template subdirectories do not receive `.gitkeep` files.
 
