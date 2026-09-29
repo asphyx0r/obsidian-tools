@@ -80,9 +80,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                 text=True,
             )
             if result.returncode != 0:
-                self.skipTest(
-                    f"Directory junctions are unavailable: {result.stderr}"
-                )
+                self.skipTest(f"Directory junctions are unavailable: {result.stderr}")
             return
 
         try:
@@ -121,13 +119,16 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
     def test_root_option_requires_a_value_instead_of_another_option(self):
         for root_option in ("-r", "--root"):
             for value in (
-                "--dry-run", "--help", "--version", "-v", "--unknown", "-name"
+                "--dry-run",
+                "--help",
+                "--version",
+                "-v",
+                "--unknown",
+                "-name",
             ):
                 with self.subTest(root_option=root_option, value=value):
                     with patch.object(MODULE, "initialize_vault") as initialize:
-                        code, stdout, stderr = self.run_main(
-                            [root_option, value]
-                        )
+                        code, stdout, stderr = self.run_main([root_option, value])
                     self.assertEqual(code, 2)
                     self.assertEqual(stdout, "")
                     self.assertIn("requires a path", stderr)
@@ -274,9 +275,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             self.initialize(root)
 
             empty_gitkeep_exists = (empty_directory / ".gitkeep").is_file()
-            populated_gitkeep_exists = (
-                populated_directory / ".gitkeep"
-            ).exists()
+            populated_gitkeep_exists = (populated_directory / ".gitkeep").exists()
             note_contents = note_path.read_bytes()
 
         self.assertTrue(empty_gitkeep_exists)
@@ -493,9 +492,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                 (root / relative_path).mkdir(parents=True)
 
             (root / "notes" / "books" / "book.md").write_bytes(b"book\n")
-            specification_path = (
-                root / "notes" / "books" / "specifications" / "spec.md"
-            )
+            specification_path = root / "notes" / "books" / "specifications" / "spec.md"
             specification_path.write_bytes(b"specification\n")
             before_snapshot = self.snapshot(root)
 
@@ -597,9 +594,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             with self.subTest(filename=filename):
                 with tempfile.TemporaryDirectory() as temporary_directory:
                     root = pathlib.Path(temporary_directory).resolve() / "vault"
-                    hinge = (
-                        root / "attachments" / "notes" / "profiles" / "hinge"
-                    )
+                    hinge = root / "attachments" / "notes" / "profiles" / "hinge"
                     hinge.mkdir(parents=True)
                     unrelated = root / "attachments" / "custom-empty"
                     unrelated.mkdir()
@@ -615,22 +610,16 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                     self.assertEqual(stderr, "")
                     self.assertEqual(self.snapshot(root), before_snapshot)
                     plan_line = f"CREATE  {hinge / '.gitkeep'}"
-                    self.assertEqual(
-                        plan_line in stdout.splitlines(), should_create
-                    )
+                    self.assertEqual(plan_line in stdout.splitlines(), should_create)
 
                     self.initialize(root)
 
                     if should_create:
-                        self.assertEqual(
-                            (hinge / ".gitkeep").read_bytes(), b""
-                        )
+                        self.assertEqual((hinge / ".gitkeep").read_bytes(), b"")
                     elif filename == "profile.png":
                         self.assertFalse((hinge / ".gitkeep").exists())
                     if filename is not None:
-                        self.assertEqual(
-                            (hinge / filename).read_bytes(), content
-                        )
+                        self.assertEqual((hinge / filename).read_bytes(), content)
                     self.assertFalse((unrelated / ".gitkeep").exists())
                     for parent in (hinge.parent, hinge.parent.parent):
                         self.assertFalse((parent / ".gitkeep").exists())
@@ -655,9 +644,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
                     gitkeep_contents = gitkeep_path.read_bytes()
 
-                self.assertEqual(
-                    gitkeep_contents, b"preserve existing content\n"
-                )
+                self.assertEqual(gitkeep_contents, b"preserve existing content\n")
                 self.assertEqual(result.gitkeep_created, expected_created)
                 self.assertEqual(result.gitkeep_existing, 1)
 
@@ -668,9 +655,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         )
         for relative_path in relative_paths:
             for dry_run in (False, True):
-                with self.subTest(
-                    relative_path=relative_path, dry_run=dry_run
-                ):
+                with self.subTest(relative_path=relative_path, dry_run=dry_run):
                     with tempfile.TemporaryDirectory() as temporary_directory:
                         root = pathlib.Path(temporary_directory).resolve() / "vault"
                         conflict_path = root / relative_path / ".gitkeep"
@@ -691,9 +676,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                             sentinel_path.read_bytes(), b"conflict sentinel\n"
                         )
                         if dry_run:
-                            self.assertEqual(
-                                self.snapshot(root), before_snapshot
-                            )
+                            self.assertEqual(self.snapshot(root), before_snapshot)
 
     def test_directory_link_is_not_followed_for_gitkeep_creation(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -727,9 +710,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
         for relative_path in relative_paths:
             for dry_run in (False, True):
-                with self.subTest(
-                    relative_path=relative_path, dry_run=dry_run
-                ):
+                with self.subTest(relative_path=relative_path, dry_run=dry_run):
                     with tempfile.TemporaryDirectory() as temporary_directory:
                         temporary_root = pathlib.Path(temporary_directory).resolve()
                         root = temporary_root / "vault"
@@ -747,9 +728,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                             arguments.append("--dry-run")
 
                         try:
-                            exit_code, stdout, stderr = self.run_main(
-                                arguments
-                            )
+                            exit_code, stdout, stderr = self.run_main(arguments)
                             after_snapshot = self.snapshot(link_target)
                             after_vault_snapshot = self.snapshot(temporary_root)
                         finally:
