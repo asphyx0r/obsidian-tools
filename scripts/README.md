@@ -48,6 +48,9 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/profiles/`                               | Notes consacrées aux profils                                                                                              |
 | `notes/goals/`                                  | Notes consacrées aux objectifs actuellement envisagés ou poursuivis                                                       |
 | `notes/gtd/`                                    | Fichiers de tri GTD                                                                                                       |
+| `notes/gtd/weekly-schedules/`                   | Plannings hebdomadaires associés à l'organisation GTD                                                                     |
+| `notes/health/`                                 | Notes consacrées à la santé                                                                                               |
+| `notes/health/nutrition/`                       | Notes consacrées à la nutrition et à l'alimentation                                                                       |
 | `attachments/`                                  | Images, documents et autres fichiers joints référencés par les notes du Vault                                             |
 | `attachments/notes/`                            | Pièces jointes associées aux notes                                                                                        |
 | `attachments/notes/profiles/`                   | Pièces jointes associées aux notes de profils                                                                             |
@@ -58,15 +61,17 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `sandbox/`                                      | Notes et fichiers temporaires utilisés pour les essais, expérimentations ou validations avant classement définitif        |
 
 Dans `notes/gtd/`, les fichiers `next-actions.md`, `waiting-for.md`, `someday.md`
-et `weekly-review.md` sont à créer par l'utilisateur. Le programme crée uniquement
-le répertoire et son `.gitkeep` s'il est vide.
+et `weekly-review.md` sont à créer par l'utilisateur. Le programme crée aussi
+`notes/gtd/weekly-schedules/`, avec un `.gitkeep` si ce sous-répertoire est vide.
+Aucun nouveau `.gitkeep` n'est créé dans le parent `notes/gtd/` ; un marqueur
+parent déjà présent est conservé sans modification.
 
 Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 `attachments/notes/profiles/hinge/`, reçoivent un `.gitkeep` vide. Les autres
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 50 répertoires, racine comprise, et 28 fichiers
+Un Vault neuf comprend 53 répertoires, racine comprise, et 29 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 

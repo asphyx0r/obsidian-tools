@@ -186,6 +186,9 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/hobbies/warhammer",
             "notes/goals",
             "notes/gtd",
+            "notes/gtd/weekly-schedules",
+            "notes/health",
+            "notes/health/nutrition",
             "notes/inbox",
             "notes/profiles",
             "notes/recipes",
@@ -234,7 +237,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/terminal/psmux/.gitkeep",
             "notes/fintech/.gitkeep",
             "notes/goals/.gitkeep",
-            "notes/gtd/.gitkeep",
+            "notes/gtd/weekly-schedules/.gitkeep",
+            "notes/health/nutrition/.gitkeep",
             "notes/hobbies/graffiti/.gitkeep",
             "notes/hobbies/magic-the-gathering/.gitkeep",
             "notes/hobbies/warhammer/.gitkeep",
@@ -258,9 +262,11 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                 path.relative_to(root).as_posix() for path in gitkeep_files
             }
             gitkeep_contents = [path.read_bytes() for path in gitkeep_files]
+            for relative_path in ("notes/gtd", "notes/health"):
+                self.assertFalse((root / relative_path / ".gitkeep").exists())
 
         self.assertEqual(actual_gitkeep_files, expected_gitkeep_files)
-        self.assertEqual(gitkeep_contents, [b""] * 28)
+        self.assertEqual(gitkeep_contents, [b""] * 29)
 
     def test_custom_empty_note_directory_receives_gitkeep(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -457,10 +463,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertFalse(root_exists)
-        self.assertEqual(len(gitkeep_plan_lines), 28)
+        self.assertEqual(len(gitkeep_plan_lines), 29)
         self.assertIn(
-            "Dry-run completed: 50 directories would be created; "
-            "0 directories already exist; 28 .gitkeep files would be "
+            "Dry-run completed: 53 directories would be created; "
+            "0 directories already exist; 29 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -505,8 +511,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 27 directories would be created; "
-            "23 directories already exist; 27 .gitkeep files would be "
+            "Dry-run completed: 30 directories would be created; "
+            "23 directories already exist; 28 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -535,14 +541,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 50 directories created; 0 directories already "
-            "existed; 28 .gitkeep files created; 0 .gitkeep files already "
+            "Completed: 53 directories created; 0 directories already "
+            "existed; 29 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 50 directories already "
-            "existed; 0 .gitkeep files created; 28 .gitkeep files already "
+            "Completed: 0 directories created; 53 directories already "
+            "existed; 0 .gitkeep files created; 29 .gitkeep files already "
             "existed."
         )
         self.assertIn(repeated_summary, second_stdout)
@@ -626,9 +632,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_existing_gitkeep_file_is_counted_without_being_modified(self):
         cases = (
-            ("notes/custom", 28),
-            ("notes/devtools/github", 28),
-            ("attachments/notes/profiles/hinge", 27),
+            ("notes/custom", 29),
+            ("notes/devtools/github", 29),
+            ("notes/gtd", 29),
+            ("attachments/notes/profiles/hinge", 28),
         )
 
         for relative_path, expected_created in cases:
