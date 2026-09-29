@@ -204,9 +204,7 @@ def _read_status(path: Path) -> os.stat_result | None:
 def _is_link(file_status: os.stat_result) -> bool:
     file_attributes = getattr(file_status, "st_file_attributes", 0)
     reparse_point = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
-    return stat.S_ISLNK(file_status.st_mode) or bool(
-        file_attributes & reparse_point
-    )
+    return stat.S_ISLNK(file_status.st_mode) or bool(file_attributes & reparse_point)
 
 
 def is_directory_link(path: Path) -> bool:
@@ -227,8 +225,7 @@ def _validate_directory_chain(path: Path) -> tuple[Path, ...]:
             continue
         if _is_link(file_status):
             raise OSError(
-                "The path is a directory link and will not be followed: "
-                f"{directory}"
+                f"The path is a directory link and will not be followed: {directory}"
             )
         if not stat.S_ISDIR(file_status.st_mode):
             raise NotADirectoryError(
@@ -337,8 +334,7 @@ def _build_initialization_plan(root_path: Path) -> _InitializationPlan:
     # Check lexical ancestors before normalizing '..', which could hide a link.
     vault_root = Path(os.path.abspath(root_path))
     directories = (vault_root,) + tuple(
-        vault_root / relative_path
-        for relative_path in RELATIVE_DIRECTORIES
+        vault_root / relative_path for relative_path in RELATIVE_DIRECTORIES
     )
     missing_directories: dict[Path, None] = {}
     existing_count = 0
