@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.5.2
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 8378bc2 | fix(tools): complete vault directory coverage | asphyx |
+| d0bb7ee | style(tools): format vault initializer | asphyx |
+
 ## v2.5.1
 
 | References | Description | Author(s) |
