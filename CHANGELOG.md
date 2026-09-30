@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.5.3
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| c7c93c1 | fix(tools): complete tattoo directory coverage | asphyx |
+
 ## v2.5.2
 
 | References | Description | Author(s) |
