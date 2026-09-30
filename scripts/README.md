@@ -45,6 +45,8 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/tasks/backlogs/`                         | Tâches, idées ou actions actives mais non planifiées, à prioriser ou traiter ultérieurement                               |
 | `notes/tasks/recurring/`                        | Tâches répétitives définies avec une cadence ou une règle de récurrence                                                   |
 | `notes/recipes/`                                | Recettes de cuisine conservées dans le Vault                                                                              |
+| `notes/tattoo/`                                 | Notes consacrées aux tatouages                                                                                            |
+| `notes/tattoo/inktober/`                        | Listes annuelles de dessins Inktober                                                                                      |
 | `notes/profiles/`                               | Notes consacrées aux profils                                                                                              |
 | `notes/goals/`                                  | Notes consacrées aux objectifs actuellement envisagés ou poursuivis                                                       |
 | `notes/gtd/`                                    | Fichiers de tri GTD                                                                                                       |
@@ -71,7 +73,7 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 53 répertoires, racine comprise, et 29 fichiers
+Un Vault neuf comprend 55 répertoires, racine comprise, et 30 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 
