@@ -33,6 +33,8 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "tasks", "backlogs"),
     Path("notes", "tasks", "recurring"),
     Path("notes", "recipes"),
+    Path("notes", "tattoo"),
+    Path("notes", "tattoo", "inktober"),
     Path("notes", "profiles"),
     Path("notes", "books"),
     Path("notes", "books", "specifications"),
