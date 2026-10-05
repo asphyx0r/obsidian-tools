@@ -58,6 +58,8 @@ RELATIVE_DIRECTORIES: Final[tuple[Path, ...]] = (
     Path("notes", "terminal"),
     Path("notes", "terminal", "tmux"),
     Path("notes", "terminal", "psmux"),
+    Path("notes", "system"),
+    Path("notes", "system", "windows"),
     Path("notes", "projects"),
     Path("notes", "projects", "prompts-source-control"),
     Path("notes", "hobbies"),

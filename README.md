@@ -107,6 +107,8 @@ notes/
 |-- terminal/
 |   |-- tmux/
 |   `-- psmux/
+|-- system/
+|   `-- windows/
 |-- projects/
 |   `-- prompts-source-control/
 `-- hobbies/
@@ -120,6 +122,8 @@ The `notes/ai/` directory covers AI outside programming and development;
 The `notes/devtools/` directory covers tools primarily used in development.
 The `notes/terminal/` directory covers terminals, command entry, and CLI tools,
 including tmux and psmux.
+The `notes/system/` directory covers operating systems; `notes/system/windows/`
+holds Windows notes, references, and procedures.
 The `notes/tattoo/` directory covers tattoo notes; `notes/tattoo/inktober/`
 holds annual Inktober drawing lists.
 
@@ -135,7 +139,7 @@ Windows reparse points in the root, its ancestors, or managed directories are
 rejected; linked custom note directories are skipped. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
-A new vault contains 55 directories including its root and 30 empty
+A new vault contains 57 directories including its root and 31 empty
 `.gitkeep` files. The initializer does not create notes, template contents,
 or attachments; the template subdirectories do not receive `.gitkeep` files.
 

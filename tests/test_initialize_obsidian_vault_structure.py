@@ -179,6 +179,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/terminal",
             "notes/terminal/tmux",
             "notes/terminal/psmux",
+            "notes/system",
+            "notes/system/windows",
             "notes/fintech",
             "notes/hobbies",
             "notes/hobbies/graffiti",
@@ -237,6 +239,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools/vscode/.gitkeep",
             "notes/terminal/tmux/.gitkeep",
             "notes/terminal/psmux/.gitkeep",
+            "notes/system/windows/.gitkeep",
             "notes/fintech/.gitkeep",
             "notes/goals/.gitkeep",
             "notes/gtd/weekly-schedules/.gitkeep",
@@ -265,11 +268,16 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
                 path.relative_to(root).as_posix() for path in gitkeep_files
             }
             gitkeep_contents = [path.read_bytes() for path in gitkeep_files]
-            for relative_path in ("notes/gtd", "notes/health", "notes/tattoo"):
+            for relative_path in (
+                "notes/gtd",
+                "notes/health",
+                "notes/tattoo",
+                "notes/system",
+            ):
                 self.assertFalse((root / relative_path / ".gitkeep").exists())
 
         self.assertEqual(actual_gitkeep_files, expected_gitkeep_files)
-        self.assertEqual(gitkeep_contents, [b""] * 30)
+        self.assertEqual(gitkeep_contents, [b""] * 31)
 
     def test_existing_tattoo_parent_receives_missing_inktober_directory(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -309,6 +317,46 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             self.assertEqual(note.read_bytes(), b"preserve this drawing list\n")
             self.assertFalse((inktober / ".gitkeep").exists())
             self.assertFalse((inktober.parent / ".gitkeep").exists())
+
+    def test_existing_system_parent_receives_missing_windows_directory(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            system = root / "notes" / "system"
+            system.mkdir(parents=True)
+            before_snapshot = self.snapshot(root)
+
+            plan, output = self.initialize(root, dry_run=True)
+
+            self.assertEqual(self.snapshot(root), before_snapshot)
+            self.assertIn(f"CREATE  {system / 'windows'}\n", output)
+
+            result, _output = self.initialize(root)
+
+            self.assertTrue((system / "windows").is_dir())
+            self.assertEqual((system / "windows" / ".gitkeep").read_bytes(), b"")
+            self.assertFalse((system / ".gitkeep").exists())
+            self.assertEqual(result.directories_created, plan.directories_planned)
+            self.assertEqual(result.gitkeep_created, plan.gitkeep_planned)
+
+    def test_populated_windows_directory_preserves_existing_note(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            windows = root / "notes" / "system" / "windows"
+            windows.mkdir(parents=True)
+            note = windows / "windows.md"
+            note.write_bytes(b"preserve this Windows note\n")
+            before_snapshot = self.snapshot(root)
+
+            self.initialize(root, dry_run=True)
+
+            self.assertEqual(self.snapshot(root), before_snapshot)
+
+            result, _output = self.initialize(root)
+
+            self.assertEqual(result.directories_existing, 4)
+            self.assertEqual(note.read_bytes(), b"preserve this Windows note\n")
+            self.assertFalse((windows / ".gitkeep").exists())
+            self.assertFalse((windows.parent / ".gitkeep").exists())
 
     def test_custom_empty_note_directory_receives_gitkeep(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -505,10 +553,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertFalse(root_exists)
-        self.assertEqual(len(gitkeep_plan_lines), 30)
+        self.assertEqual(len(gitkeep_plan_lines), 31)
         self.assertIn(
-            "Dry-run completed: 55 directories would be created; "
-            "0 directories already exist; 30 .gitkeep files would be "
+            "Dry-run completed: 57 directories would be created; "
+            "0 directories already exist; 31 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -553,8 +601,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 32 directories would be created; "
-            "23 directories already exist; 29 .gitkeep files would be "
+            "Dry-run completed: 34 directories would be created; "
+            "23 directories already exist; 30 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -583,14 +631,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 55 directories created; 0 directories already "
-            "existed; 30 .gitkeep files created; 0 .gitkeep files already "
+            "Completed: 57 directories created; 0 directories already "
+            "existed; 31 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 55 directories already "
-            "existed; 0 .gitkeep files created; 30 .gitkeep files already "
+            "Completed: 0 directories created; 57 directories already "
+            "existed; 0 .gitkeep files created; 31 .gitkeep files already "
             "existed."
         )
         self.assertIn(repeated_summary, second_stdout)
@@ -674,10 +722,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_existing_gitkeep_file_is_counted_without_being_modified(self):
         cases = (
-            ("notes/custom", 30),
-            ("notes/devtools/github", 30),
-            ("notes/gtd", 30),
-            ("attachments/notes/profiles/hinge", 29),
+            ("notes/custom", 31),
+            ("notes/devtools/github", 31),
+            ("notes/gtd", 31),
+            ("attachments/notes/profiles/hinge", 30),
         )
 
         for relative_path, expected_created in cases:
