@@ -40,6 +40,8 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/terminal/`                               | Notes consacrées aux terminaux, à la saisie de commandes et aux outils CLI                                                |
 | `notes/terminal/tmux/`                          | Notes, références et procédures consacrées à tmux                                                                         |
 | `notes/terminal/psmux/`                         | Notes, références et procédures consacrées à psmux                                                                        |
+| `notes/system/`                                 | Notes consacrées aux systèmes d'exploitation                                                                              |
+| `notes/system/windows/`                         | Notes, références et procédures consacrées à Windows                                                                      |
 | `notes/tasks/`                                  | Racine des listes et notes servant à gérer les tâches actives                                                             |
 | `notes/tasks/daily/`                            | Listes opérationnelles de tâches rattachées à une journée précise                                                         |
 | `notes/tasks/backlogs/`                         | Tâches, idées ou actions actives mais non planifiées, à prioriser ou traiter ultérieurement                               |
@@ -73,7 +75,7 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 55 répertoires, racine comprise, et 30 fichiers
+Un Vault neuf comprend 57 répertoires, racine comprise, et 31 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 

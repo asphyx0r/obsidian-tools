@@ -568,7 +568,9 @@ optional, deferred, or explicitly excluded from this repository.
   `notes/gtd/weekly-schedules/` and `notes/health/nutrition/` with its parent
   `notes/health/`. The `notes/tattoo/` directory covers tattoo notes, with
   `notes/tattoo/inktober/` for annual Inktober drawing lists.
-  A new vault contains 55 directories including its root and 30 `.gitkeep` files.
+  `notes/system/` covers operating systems, with `notes/system/windows/` for
+  Windows notes, references, and procedures.
+  A new vault contains 57 directories including its root and 31 `.gitkeep` files.
   The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and
