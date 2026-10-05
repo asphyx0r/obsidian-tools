@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.6.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 42820ce | feat(tools): add Windows vault directories | asphyx |
+
 ## v2.5.3
 
 | References | Description | Author(s) |
