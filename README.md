@@ -113,6 +113,10 @@ notes/
 |   `-- prompts-source-control/
 `-- hobbies/
     |-- warhammer/
+    |-- warhammer40k/
+    |   `-- v11/
+    |-- age-of-sigmar/
+    |-- the-old-world/
     |-- magic-the-gathering/
     `-- graffiti/
 ```
@@ -139,7 +143,7 @@ Windows reparse points in the root, its ancestors, or managed directories are
 rejected; linked custom note directories are skipped. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
-A new vault contains 57 directories including its root and 31 empty
+A new vault contains 61 directories including its root and 34 empty
 `.gitkeep` files. The initializer does not create notes, template contents,
 or attachments; the template subdirectories do not receive `.gitkeep` files.
 
