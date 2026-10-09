@@ -570,7 +570,9 @@ optional, deferred, or explicitly excluded from this repository.
   `notes/tattoo/inktober/` for annual Inktober drawing lists.
   `notes/system/` covers operating systems, with `notes/system/windows/` for
   Windows notes, references, and procedures.
-  A new vault contains 57 directories including its root and 31 `.gitkeep` files.
+  `notes/hobbies/` includes `warhammer/`, `warhammer40k/` with its `v11/`
+  subdirectory, `age-of-sigmar/`, and `the-old-world/`.
+  A new vault contains 61 directories including its root and 34 `.gitkeep` files.
   The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and

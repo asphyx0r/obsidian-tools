@@ -24,6 +24,10 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `notes/projects/prompts-source-control/`        | Notes Obsidian consacrées au dépôt `Prompts Source Control`                                                               |
 | `notes/hobbies/`                                | Racine des notes consacrées aux loisirs et centres d'intérêt                                                              |
 | `notes/hobbies/warhammer/`                      | Notes consacrées à Warhammer et aux sujets associés                                                                       |
+| `notes/hobbies/warhammer40k/`                   | Notes consacrées à Warhammer 40,000                                                                                       |
+| `notes/hobbies/warhammer40k/v11/`               | Notes et références Warhammer 40,000 pour v11                                                                             |
+| `notes/hobbies/age-of-sigmar/`                  | Notes consacrées à Age of Sigmar                                                                                          |
+| `notes/hobbies/the-old-world/`                  | Notes consacrées à The Old World                                                                                          |
 | `notes/hobbies/magic-the-gathering/`            | Notes consacrées à Magic: The Gathering                                                                                   |
 | `notes/hobbies/graffiti/`                       | Notes consacrées au graffiti et aux sujets associés                                                                       |
 | `notes/books/`                                  | Notes et documentation relatives aux livres                                                                               |
@@ -75,7 +79,7 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 57 répertoires, racine comprise, et 31 fichiers
+Un Vault neuf comprend 61 répertoires, racine comprise, et 34 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 
