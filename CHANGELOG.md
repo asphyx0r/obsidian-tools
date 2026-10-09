@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v2.6.1
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| d795fb0 | fix(tools): complete warhammer directory coverage | asphyx |
+
 ## v2.6.0
 
 | References | Description | Author(s) |
