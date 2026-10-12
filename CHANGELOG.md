@@ -2,6 +2,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v3.0.0
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| b8ec3c3 | feat(templates)!: align vault topic directories | asphyx |
+
 ## v2.6.1
 
 | References | Description | Author(s) |
