@@ -8,8 +8,24 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `<racine-du-Vault>/`                            | Répertoire racine du Vault et point d'ancrage de tous les autres répertoires créés par le programme                       |
 | `templates/`                                    | Modèles Markdown réutilisables servant à créer des notes homogènes dans le Vault                                          |
-| `templates/gtd/`                                | Modèles pour les listes et revues GTD                                                                                     |
-| `templates/profiles/`                           | Modèles pour les notes de profils                                                                                         |
+| `templates/notes/`                              | Modèles de notes classés selon les catégories de notes/                                                                   |
+| `templates/notes/ai/`                           | Modèles consacrés à l’intelligence artificielle hors développement                                                        |
+| `templates/notes/ai/chatgpt/`                   | Modèles pour les usages de ChatGPT hors développement                                                                     |
+| `templates/notes/books/`                        | Modèles pour les notes de livres                                                                                          |
+| `templates/notes/devtools/`                     | Modèles pour les outils de développement                                                                                  |
+| `templates/notes/devtools/codex/`               | Modèles pour les rapports et références Codex                                                                             |
+| `templates/notes/devtools/git/`                 | Modèles pour les références Git et les arborescences de dépôts                                                            |
+| `templates/notes/devtools/github/`              | Modèles consacrés à GitHub                                                                                                |
+| `templates/notes/devtools/github/repositories/` | Modèles pour les fiches de dépôts GitHub                                                                                  |
+| `templates/notes/goals/`                        | Modèles pour les objectifs personnels                                                                                     |
+| `templates/notes/gtd/`                          | Modèles pour les listes et revues GTD                                                                                     |
+| `templates/notes/gtd/weekly-schedules/`         | Modèles pour les plannings hebdomadaires                                                                                  |
+| `templates/notes/hobbies/`                      | Modèles de loisirs communs à plusieurs jeux ou catégories                                                                 |
+| `templates/notes/profiles/`                     | Modèles pour les notes de profils                                                                                         |
+| `templates/notes/recipes/`                      | Modèles de recettes et export du template Web Clipper                                                                     |
+| `templates/notes/tasks/`                        | Modèles pour les listes de tâches                                                                                         |
+| `templates/notes/tattoo/`                       | Modèles consacrés au tatouage                                                                                             |
+| `templates/notes/tattoo/inktober/`              | Modèles pour les listes annuelles Inktober                                                                                |
 | `notes/`                                        | Racine principale des notes actives, organisées par domaine, usage ou sujet                                               |
 | `notes/inbox/`                                  | Notes capturées rapidement et conservées temporairement avant leur classement définitif                                   |
 | `notes/fintech/`                                | Notes consacrées à la FinTech et aux sujets bancaires ou financiers associés                                              |
@@ -68,6 +84,14 @@ la racine sélectionnée avec `--root` ou à la racine par défaut du programme.
 | `archive/goals/`                                | Objectifs qui ne sont plus actifs, afin de conserver leur historique sans encombrer les objectifs courants                |
 | `sandbox/`                                      | Notes et fichiers temporaires utilisés pour les essais, expérimentations ou validations avant classement définitif        |
 
+Les modèles thématiques se trouvent dans `templates/notes/<catégorie>/`. Les
+catégories reprennent les domaines de `notes/`, sans duplication systématique
+de tous ses sous-répertoires. Les modèles génériques peuvent rester dans
+`templates/`. Les pièces jointes propres à une note utilisent
+`attachments/notes/<catégorie>/<nom-de-note>/` ; le dernier dossier n’est pas
+une catégorie à reproduire dans les notes et les modèles. Le programme ne
+modifie aucun fichier et ne synchronise pas ces trois arborescences.
+
 Dans `notes/gtd/`, les fichiers `next-actions.md`, `waiting-for.md`, `someday.md`
 et `weekly-review.md` sont à créer par l'utilisateur. Le programme crée aussi
 `notes/gtd/weekly-schedules/`, avec un `.gitkeep` si ce sous-répertoire est vide.
@@ -79,7 +103,7 @@ Les sous-répertoires vides de `notes/`, ainsi que le répertoire vide
 répertoires de pièces jointes ne reçoivent pas de `.gitkeep`. Les fichiers
 existants, y compris les `.gitkeep`, sont conservés sans modification.
 
-Un Vault neuf comprend 61 répertoires, racine comprise, et 34 fichiers
+Un Vault neuf comprend 77 répertoires, racine comprise, et 34 fichiers
 `.gitkeep` vides. Le programme ne crée pas le contenu des notes, des modèles
 ou des pièces jointes, ni de `.gitkeep` dans les répertoires de modèles.
 

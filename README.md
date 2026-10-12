@@ -132,8 +132,12 @@ The `notes/tattoo/` directory covers tattoo notes; `notes/tattoo/inktober/`
 holds annual Inktober drawing lists.
 
 It also creates the top-level `templates/`, `attachments/`, `archive/`, and
-`sandbox/` directories, including `templates/gtd/`, `templates/profiles/`,
-`archive/tasks/`, `archive/goals/`, and
+`sandbox/` directories. Topic-specific template directories are under
+`templates/notes/`, using the same categories as `notes/`. Only the declared
+template categories are created; other notes categories are not mirrored.
+Generic templates can remain directly under `templates/`. See
+[scripts/README.md](scripts/README.md) for the complete directory list.
+The tool also reserves `archive/tasks/`, `archive/goals/`, and
 `attachments/notes/profiles/hinge/` with its parents. Empty subdirectories below
 `notes/` and the empty Hinge directory receive a zero-byte `.gitkeep`. Other
 attachment directories do not receive `.gitkeep` files. Existing files and
@@ -143,7 +147,7 @@ Windows reparse points in the root, its ancestors, or managed directories are
 rejected; linked custom note directories are skipped. The system directories `.githooks/`,
 `.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
 
-A new vault contains 61 directories including its root and 34 empty
+A new vault contains 77 directories including its root and 34 empty
 `.gitkeep` files. The initializer does not create notes, template contents,
 or attachments; the template subdirectories do not receive `.gitkeep` files.
 

@@ -560,7 +560,9 @@ optional, deferred, or explicitly excluded from this repository.
   directories and files are preserved, repeated execution is idempotent, and
   omitted roots use `G:\Mon Drive\obsidian-vault` on Windows or `~/Obsidian`
   elsewhere. The managed tree includes GitHub repository notes, profile notes,
-  Hinge profile attachments, and GTD and profile template directories.
+  Hinge profile attachments, and selected topic directories under
+  `templates/notes/`. Template categories match the notes taxonomy without
+  mirroring every notes directory; generic templates remain in `templates/`.
   `notes/ai/chatgpt/` covers ChatGPT usage outside programming and development,
   while `notes/devtools/` covers tools primarily used in development.
   `notes/terminal/` covers terminals, command entry, and CLI tools, with
@@ -572,7 +574,7 @@ optional, deferred, or explicitly excluded from this repository.
   Windows notes, references, and procedures.
   `notes/hobbies/` includes `warhammer/`, `warhammer40k/` with its `v11/`
   subdirectory, `age-of-sigmar/`, and `the-old-world/`.
-  A new vault contains 61 directories including its root and 34 `.gitkeep` files.
+  A new vault contains 77 directories including its root and 34 `.gitkeep` files.
   The tool creates zero-byte `.gitkeep` files
   in empty subdirectories below `notes/` and in the empty
   `attachments/notes/profiles/hinge/` directory. It reports directory and
@@ -728,7 +730,8 @@ optional, deferred, or explicitly excluded from this repository.
 
 - Type: `file`
 - Status: `required`
-- Goal: Verifies the default vault tree, recursive note `.gitkeep` creation,
+- Goal: Verifies the default vault tree with selected topic template
+  directories, recursive note `.gitkeep` creation,
   Hinge attachment `.gitkeep` creation and preservation,
   side-effect-free dry runs, system-directory isolation, data preservation,
   argument validation, ancestor and broken-link rejection, preflight failures

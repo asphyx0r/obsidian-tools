@@ -210,8 +210,24 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/work/datalog",
             "sandbox",
             "templates",
-            "templates/gtd",
-            "templates/profiles",
+            "templates/notes",
+            "templates/notes/ai",
+            "templates/notes/ai/chatgpt",
+            "templates/notes/books",
+            "templates/notes/devtools",
+            "templates/notes/devtools/codex",
+            "templates/notes/devtools/git",
+            "templates/notes/devtools/github",
+            "templates/notes/devtools/github/repositories",
+            "templates/notes/goals",
+            "templates/notes/gtd",
+            "templates/notes/gtd/weekly-schedules",
+            "templates/notes/hobbies",
+            "templates/notes/profiles",
+            "templates/notes/recipes",
+            "templates/notes/tasks",
+            "templates/notes/tattoo",
+            "templates/notes/tattoo/inktober",
         }
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -607,7 +623,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertFalse(root_exists)
         self.assertEqual(len(gitkeep_plan_lines), 34)
         self.assertIn(
-            "Dry-run completed: 61 directories would be created; "
+            "Dry-run completed: 77 directories would be created; "
             "0 directories already exist; 34 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
@@ -653,7 +669,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 38 directories would be created; "
+            "Dry-run completed: 54 directories would be created; "
             "23 directories already exist; 33 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
@@ -683,13 +699,13 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 61 directories created; 0 directories already "
+            "Completed: 77 directories created; 0 directories already "
             "existed; 34 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 61 directories already "
+            "Completed: 0 directories created; 77 directories already "
             "existed; 0 .gitkeep files created; 34 .gitkeep files already "
             "existed."
         )
