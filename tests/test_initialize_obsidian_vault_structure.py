@@ -156,7 +156,20 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "archive/goals",
             "archive/tasks",
             "attachments",
+            "attachments/archive",
+            "attachments/archive/sans-titre-9",
             "attachments/notes",
+            "attachments/notes/devtools",
+            "attachments/notes/devtools/docker",
+            "attachments/notes/devtools/docker/formation-dokcv2",
+            "attachments/notes/health",
+            "attachments/notes/health/medical",
+            "attachments/notes/health/nutrition",
+            "attachments/notes/hobbies",
+            "attachments/notes/hobbies/warhammer40k",
+            "attachments/notes/hobbies/warhammer40k/v11",
+            "attachments/notes/hobbies/warhammer40k/v11/blood-angels-smooth-slapchop",
+            "attachments/notes/hobbies/warhammer40k/v11/captain-tycho-s-blood-angels",
             "attachments/notes/profiles",
             "attachments/notes/profiles/hinge",
             "notes",
@@ -172,6 +185,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/devtools",
             "notes/devtools/claude",
             "notes/devtools/codex",
+            "notes/devtools/docker",
             "notes/devtools/git",
             "notes/devtools/github",
             "notes/devtools/github/repositories",
@@ -181,6 +195,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/terminal/psmux",
             "notes/system",
             "notes/system/windows",
+            "notes/system/windows/wsl",
             "notes/fintech",
             "notes/hobbies",
             "notes/hobbies/graffiti",
@@ -192,10 +207,15 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/hobbies/warhammer40k/v11",
             "notes/goals",
             "notes/gtd",
+            "notes/gtd/inbox",
+            "notes/gtd/reference",
+            "notes/gtd/reference/samples",
             "notes/gtd/weekly-schedules",
             "notes/health",
+            "notes/health/medical",
             "notes/health/nutrition",
             "notes/inbox",
+            "notes/obsidian",
             "notes/profiles",
             "notes/recipes",
             "notes/projects",
@@ -206,6 +226,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/tasks/recurring",
             "notes/tattoo",
             "notes/tattoo/inktober",
+            "notes/watchlists",
             "notes/work",
             "notes/work/datalog",
             "sandbox",
@@ -254,15 +275,19 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/code/sql/.gitkeep",
             "notes/devtools/claude/.gitkeep",
             "notes/devtools/codex/.gitkeep",
+            "notes/devtools/docker/.gitkeep",
             "notes/devtools/git/.gitkeep",
             "notes/devtools/github/repositories/.gitkeep",
             "notes/devtools/vscode/.gitkeep",
             "notes/terminal/tmux/.gitkeep",
             "notes/terminal/psmux/.gitkeep",
-            "notes/system/windows/.gitkeep",
+            "notes/system/windows/wsl/.gitkeep",
             "notes/fintech/.gitkeep",
             "notes/goals/.gitkeep",
+            "notes/gtd/inbox/.gitkeep",
+            "notes/gtd/reference/samples/.gitkeep",
             "notes/gtd/weekly-schedules/.gitkeep",
+            "notes/health/medical/.gitkeep",
             "notes/health/nutrition/.gitkeep",
             "notes/hobbies/graffiti/.gitkeep",
             "notes/hobbies/age-of-sigmar/.gitkeep",
@@ -271,6 +296,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/hobbies/warhammer/.gitkeep",
             "notes/hobbies/warhammer40k/v11/.gitkeep",
             "notes/inbox/.gitkeep",
+            "notes/obsidian/.gitkeep",
             "notes/profiles/.gitkeep",
             "notes/recipes/.gitkeep",
             "notes/projects/prompts-source-control/.gitkeep",
@@ -278,6 +304,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             "notes/tasks/daily/.gitkeep",
             "notes/tasks/recurring/.gitkeep",
             "notes/tattoo/inktober/.gitkeep",
+            "notes/watchlists/.gitkeep",
             "notes/work/datalog/.gitkeep",
         }
 
@@ -293,16 +320,18 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             gitkeep_contents = [path.read_bytes() for path in gitkeep_files]
             for relative_path in (
                 "notes/gtd",
+                "notes/gtd/reference",
                 "notes/health",
                 "notes/tattoo",
                 "notes/system",
+                "notes/system/windows",
                 "notes/hobbies",
                 "notes/hobbies/warhammer40k",
             ):
                 self.assertFalse((root / relative_path / ".gitkeep").exists())
 
         self.assertEqual(actual_gitkeep_files, expected_gitkeep_files)
-        self.assertEqual(gitkeep_contents, [b""] * 34)
+        self.assertEqual(gitkeep_contents, [b""] * 40)
 
     def test_existing_warhammer40k_parent_receives_missing_v11_directory(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -390,18 +419,21 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = pathlib.Path(temporary_directory).resolve() / "vault"
             system = root / "notes" / "system"
+            windows = system / "windows"
+            wsl = windows / "wsl"
             system.mkdir(parents=True)
             before_snapshot = self.snapshot(root)
 
             plan, output = self.initialize(root, dry_run=True)
 
             self.assertEqual(self.snapshot(root), before_snapshot)
-            self.assertIn(f"CREATE  {system / 'windows'}\n", output)
+            self.assertIn(f"CREATE  {windows}\n", output)
+            self.assertIn(f"CREATE  {wsl}\n", output)
 
             result, _output = self.initialize(root)
 
-            self.assertTrue((system / "windows").is_dir())
-            self.assertEqual((system / "windows" / ".gitkeep").read_bytes(), b"")
+            self.assertEqual((wsl / ".gitkeep").read_bytes(), b"")
+            self.assertFalse((windows / ".gitkeep").exists())
             self.assertFalse((system / ".gitkeep").exists())
             self.assertEqual(result.directories_created, plan.directories_planned)
             self.assertEqual(result.gitkeep_created, plan.gitkeep_planned)
@@ -423,6 +455,7 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
             self.assertEqual(result.directories_existing, 4)
             self.assertEqual(note.read_bytes(), b"preserve this Windows note\n")
+            self.assertEqual((windows / "wsl" / ".gitkeep").read_bytes(), b"")
             self.assertFalse((windows / ".gitkeep").exists())
             self.assertFalse((windows.parent / ".gitkeep").exists())
 
@@ -468,6 +501,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             root = pathlib.Path(temporary_directory).resolve() / "vault"
             root.mkdir()
             (root / "templates").write_bytes(b"preserve template conflict\n")
+            self.assert_preflight_failure(root, root, "not a directory")
+
+    def test_attachment_directory_conflict_fails_before_any_creation(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = pathlib.Path(temporary_directory).resolve() / "vault"
+            nutrition = root / "attachments" / "notes" / "health" / "nutrition"
+            nutrition.parent.mkdir(parents=True)
+            nutrition.write_bytes(b"preserve attachment conflict\n")
             self.assert_preflight_failure(root, root, "not a directory")
 
     def test_file_ancestor_fails_before_any_creation(self):
@@ -621,10 +662,10 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertFalse(root_exists)
-        self.assertEqual(len(gitkeep_plan_lines), 34)
+        self.assertEqual(len(gitkeep_plan_lines), 40)
         self.assertIn(
-            "Dry-run completed: 77 directories would be created; "
-            "0 directories already exist; 34 .gitkeep files would be "
+            "Dry-run completed: 98 directories would be created; "
+            "0 directories already exist; 40 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -669,8 +710,8 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(stderr, "")
         self.assertIn(
-            "Dry-run completed: 54 directories would be created; "
-            "23 directories already exist; 33 .gitkeep files would be "
+            "Dry-run completed: 75 directories would be created; "
+            "23 directories already exist; 39 .gitkeep files would be "
             "created; 0 .gitkeep files already exist.",
             stdout,
         )
@@ -699,14 +740,14 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
             ("", "", ""),
         )
         self.assertIn(
-            "Completed: 77 directories created; 0 directories already "
-            "existed; 34 .gitkeep files created; 0 .gitkeep files already "
+            "Completed: 98 directories created; 0 directories already "
+            "existed; 40 .gitkeep files created; 0 .gitkeep files already "
             "existed.",
             first_stdout,
         )
         repeated_summary = (
-            "Completed: 0 directories created; 77 directories already "
-            "existed; 0 .gitkeep files created; 34 .gitkeep files already "
+            "Completed: 0 directories created; 98 directories already "
+            "existed; 0 .gitkeep files created; 40 .gitkeep files already "
             "existed."
         )
         self.assertIn(repeated_summary, second_stdout)
@@ -790,12 +831,13 @@ class InitializeObsidianVaultStructureTests(unittest.TestCase):
 
     def test_existing_gitkeep_file_is_counted_without_being_modified(self):
         cases = (
-            ("notes/custom", 34),
-            ("notes/devtools/github", 34),
-            ("notes/gtd", 34),
-            ("notes/hobbies/warhammer40k", 34),
-            ("notes/hobbies/warhammer40k/v11", 33),
-            ("attachments/notes/profiles/hinge", 33),
+            ("notes/custom", 40),
+            ("notes/devtools/github", 40),
+            ("notes/gtd", 40),
+            ("notes/hobbies/warhammer40k", 40),
+            ("notes/hobbies/warhammer40k/v11", 39),
+            ("notes/system/windows", 40),
+            ("attachments/notes/profiles/hinge", 39),
         )
 
         for relative_path, expected_created in cases:
