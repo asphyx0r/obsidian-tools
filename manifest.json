@@ -2,15 +2,15 @@
     "manifest_version": "2.0.0",
     "program_id": "obsidian-tools",
     "name": "Obsidian Tools",
-    "version": "3.0.0",
-    "release_date": "2026-10-12T11:23:24Z",
+    "version": "3.0.1",
+    "release_date": "2026-11-20T16:28:19Z",
     "channel": "stable",
-    "critical_update": false,
+    "critical_update": true,
     "release_notes": [
-        "Create selected topic template categories under templates/notes and synchronize initializer tests and documentation.",
-        "Initialize 77 directories including the vault root and 34 empty .gitkeep markers in a fresh vault.",
-        "Preserve existing notes, templates, attachments and marker contents without automatically migrating template files.",
-        "Update references to the previous topic template paths and migrate existing template content separately."
+        "Recreate all 97 user directories in the audited vault layout.",
+        "Create 40 empty placeholders in a new vault and preserve existing markers.",
+        "Reject symbolic links and Windows reparse points detected in backup sources.",
+        "Stop backup creation when source directory enumeration fails."
     ],
     "update": {
         "min_source_version": "2.2.0",
@@ -24,7 +24,7 @@
     },
     "artifacts": [
         {
-            "id": "obsidian-tools-v3.0.0",
+            "id": "obsidian-tools-v3.0.1",
             "target": {
                 "os": "any",
                 "arch": "any",
@@ -32,9 +32,9 @@
             },
             "format": "git-tree",
             "total_files": 115,
-            "size_bytes": 1389798,
-            "built_at": "2026-10-12T11:23:24Z",
-            "sha256": "0ddd0d9942367de7702db17878424f12ab2ca72b2d553bb2550caf4412687b17",
+            "size_bytes": 1404779,
+            "built_at": "2026-11-20T16:28:19Z",
+            "sha256": "0710fe5dddf7000a3f99154fb3199be817e5971b6013a417ca799972b5972f8e",
             "files": [
                 {
                     "relative_path": ".agents/skills/git-commit-push-tag/SKILL.md",
@@ -299,11 +299,11 @@
                 },
                 {
                     "relative_path": "CHANGELOG.md",
-                    "size_bytes": 3535,
+                    "size_bytes": 3741,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "3a1403133dcf795a606639b7ee7af24289e0077867a04ca3c5a286176adb2503",
+                    "sha256": "135a70b9a5adf7b4b50a832699c4583e50263457628346f7451a40d2b3fbe682",
                     "mode": "644"
                 },
                 {
@@ -371,11 +371,11 @@
                 },
                 {
                     "relative_path": "README.md",
-                    "size_bytes": 5886,
+                    "size_bytes": 6352,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "82ced94edbb9d67e206dca14e391af52f41539b753ad8abfd99797e0adc12001",
+                    "sha256": "033ce1e8fd3f1b9993345f21e9de6c8f19a5740a352e4697f508258f0ee4441a",
                     "mode": "644"
                 },
                 {
@@ -411,7 +411,7 @@
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "2985be8b28d3ade858e8d8fb4bc22f565b1bf6020dff982dce141f7721b9999c",
+                    "sha256": "06e3fe4a7a1884d20d81cc7065ca8cfd4c394ec602c4d180ddc39bbd4f7da521",
                     "mode": "644"
                 },
                 {
@@ -497,11 +497,11 @@
                 },
                 {
                     "relative_path": "docs/repository-files.md",
-                    "size_bytes": 42697,
+                    "size_bytes": 42362,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "5426a726a715ca2a0aab7993a53ffc74e78473459413879d87130f9e1bdd496a",
+                    "sha256": "d9319cde5a63a34f4dad688f4c551ab7b2f7d6e884ba43627e8fba8dd1e013b2",
                     "mode": "644"
                 },
                 {
@@ -515,20 +515,20 @@
                 },
                 {
                     "relative_path": "scripts/README.md",
-                    "size_bytes": 17340,
+                    "size_bytes": 23354,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "e47d7a30a118e93221f87c1ef5cec2913b24b4618647eccb2edc404b210a5d44",
+                    "sha256": "38e33b7503d6026cffc4c7510f5cef05f557e9d73c3595f2b3b07f856d3323c2",
                     "mode": "644"
                 },
                 {
                     "relative_path": "scripts/initialize-obsidian-vault-structure.py",
-                    "size_bytes": 17167,
+                    "size_bytes": 18389,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "1427db7440110f4a9191e3094554c417a5779b611a4bc773aa001a66079b7305",
+                    "sha256": "7413e01199e41545c9b55e1945dc07464e1b22a138794b31a865aea73d6b10d8",
                     "mode": "644"
                 },
                 {
@@ -677,11 +677,11 @@
                 },
                 {
                     "relative_path": "tests/test_backup_target_directory.py",
-                    "size_bytes": 24030,
+                    "size_bytes": 28200,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "a5db33e2d039e1506a0f517816b834e1a0859367b6307a0a0b44ca8306347dba",
+                    "sha256": "5a7a053388252a0759cd5137e0854622966be0a648f0a0c6278e9752adeabe8b",
                     "mode": "644"
                 },
                 {
@@ -713,11 +713,11 @@
                 },
                 {
                     "relative_path": "tests/test_initialize_obsidian_vault_structure.py",
-                    "size_bytes": 39369,
+                    "size_bytes": 41419,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "58ced76f72750c6b91a22a3bf8fc1a1ac0afeb2c028ca034ee6eebb39a53a7cc",
+                    "sha256": "48f036d383bf7ecb3a1fef23fa7513096ab58259a2ab19e72cf6a0befc146ca0",
                     "mode": "644"
                 },
                 {
@@ -749,11 +749,11 @@
                 },
                 {
                     "relative_path": "tools/README.md",
-                    "size_bytes": 6460,
+                    "size_bytes": 6536,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "60ec426ea38a94ff461137515126bf1604c3942ef6dabb466332b99465955f40",
+                    "sha256": "c2427620e3429d5aed3e83b273aea0bc8710823a5610e71312fbc316c6863cd9",
                     "mode": "644"
                 },
                 {
@@ -767,11 +767,11 @@
                 },
                 {
                     "relative_path": "tools/backup-target-directory.py",
-                    "size_bytes": 16976,
+                    "size_bytes": 18088,
                     "file_type": "text",
                     "line_ending": "LF",
                     "encoding": "UTF-8",
-                    "sha256": "2151e88d0907a0c0de04d43feea80be2779f40979b4c00a1e55821094802e9bf",
+                    "sha256": "f0b637359efa11b99ae0c0152c55066379f30f515bcf2a7cd377b0263b76ee23",
                     "mode": "644"
                 },
                 {
