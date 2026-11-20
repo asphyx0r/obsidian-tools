@@ -67,15 +67,21 @@ for filesystem or initialization errors, and `2` for invalid arguments.
 
 ## Directory structure
 
-The tool creates the following default notes tree:
+The initializer uses a fixed directory snapshot of the reference vault.
+Its built-in list covers all 97 user directories in that snapshot. The
+`notes/` branch is:
 
 ```text
 notes/
 |-- inbox/
 |-- goals/
 |-- gtd/
+|   |-- inbox/
+|   |-- reference/
+|   |   `-- samples/
 |   `-- weekly-schedules/
 |-- health/
+|   |-- medical/
 |   `-- nutrition/
 |-- tasks/
 |   |-- daily/
@@ -103,14 +109,18 @@ notes/
 |   |-- git/
 |   |-- github/
 |   |   `-- repositories/
+|   |-- docker/
 |   `-- vscode/
 |-- terminal/
 |   |-- tmux/
 |   `-- psmux/
 |-- system/
 |   `-- windows/
+|       `-- wsl/
+|-- obsidian/
 |-- projects/
 |   `-- prompts-source-control/
+|-- watchlists/
 `-- hobbies/
     |-- warhammer/
     |-- warhammer40k/
@@ -126,8 +136,9 @@ The `notes/ai/` directory covers AI outside programming and development;
 The `notes/devtools/` directory covers tools primarily used in development.
 The `notes/terminal/` directory covers terminals, command entry, and CLI tools,
 including tmux and psmux.
-The `notes/system/` directory covers operating systems; `notes/system/windows/`
-holds Windows notes, references, and procedures.
+The `notes/system/` directory covers operating systems. The
+`notes/system/windows/` directory holds Windows notes, references, and
+procedures, with a `wsl/` subdirectory for Windows Subsystem for Linux.
 The `notes/tattoo/` directory covers tattoo notes; `notes/tattoo/inktober/`
 holds annual Inktober drawing lists.
 
@@ -135,21 +146,25 @@ It also creates the top-level `templates/`, `attachments/`, `archive/`, and
 `sandbox/` directories. Topic-specific template directories are under
 `templates/notes/`, using the same categories as `notes/`. Only the declared
 template categories are created; other notes categories are not mirrored.
-Generic templates can remain directly under `templates/`. See
-[scripts/README.md](scripts/README.md) for the complete directory list.
-The tool also reserves `archive/tasks/`, `archive/goals/`, and
-`attachments/notes/profiles/hinge/` with its parents. Empty subdirectories below
-`notes/` and the empty Hinge directory receive a zero-byte `.gitkeep`. Other
-attachment directories do not receive `.gitkeep` files. Existing files and
-existing regular `.gitkeep` contents are never modified. A `.gitkeep` that is
-a directory, link, or other non-regular entry is rejected. Directory links and
-Windows reparse points in the root, its ancestors, or managed directories are
-rejected; linked custom note directories are skipped. The system directories `.githooks/`,
-`.github/`, `.GitHub/`, and `.obsidian/` are not managed by the tool.
+Generic templates can remain directly under `templates/`. The tool also
+creates `archive/tasks/` and `archive/goals/`. The attachment tree includes
+`attachments/archive/` and directories for Docker, health, Warhammer 40,000,
+and Hinge. See the [complete directory guide](scripts/README.md).
 
-A new vault contains 77 directories including its root and 34 empty
-`.gitkeep` files. The initializer does not create notes, template contents,
-or attachments; the template subdirectories do not receive `.gitkeep` files.
+Empty subdirectories below `notes/` and the empty
+`attachments/notes/profiles/hinge/` directory receive a zero-byte `.gitkeep`.
+Within `attachments/`, this rule applies only to Hinge. The initializer
+preserves existing files, including any legacy `notes/system/windows/.gitkeep`.
+A `.gitkeep` that is a directory, link, or other non-regular entry is rejected.
+The initializer rejects directory links and Windows reparse points in the root,
+its ancestors, or managed directories. It skips linked custom note directories.
+The snapshot excludes `.git/`, `.githooks/`, `.github/`, and `.obsidian/`.
+
+A new vault contains 98 directories including its root and 40 empty
+`.gitkeep` files, one in each of the 39 leaf directories under `notes/` and
+one in Hinge. Initialization creates directories and these placeholders.
+Notes, template content, attachment files, and vault settings are outside the
+snapshot.
 
 Review the `--dry-run` output before using the default structure with an
 existing vault.

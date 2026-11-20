@@ -559,29 +559,22 @@ optional, deferred, or explicitly excluded from this repository.
 - Notes: Requires Python 3.10 or later and no third-party package. Existing
   directories and files are preserved, repeated execution is idempotent, and
   omitted roots use `G:\Mon Drive\obsidian-vault` on Windows or `~/Obsidian`
-  elsewhere. The managed tree includes GitHub repository notes, profile notes,
-  Hinge profile attachments, and selected topic directories under
-  `templates/notes/`. Template categories match the notes taxonomy without
-  mirroring every notes directory; generic templates remain in `templates/`.
-  `notes/ai/chatgpt/` covers ChatGPT usage outside programming and development,
-  while `notes/devtools/` covers tools primarily used in development.
-  `notes/terminal/` covers terminals, command entry, and CLI tools, with
-  `tmux/` and `psmux/` subdirectories. The managed tree also includes
-  `notes/gtd/weekly-schedules/` and `notes/health/nutrition/` with its parent
-  `notes/health/`. The `notes/tattoo/` directory covers tattoo notes, with
-  `notes/tattoo/inktober/` for annual Inktober drawing lists.
-  `notes/system/` covers operating systems, with `notes/system/windows/` for
-  Windows notes, references, and procedures.
-  `notes/hobbies/` includes `warhammer/`, `warhammer40k/` with its `v11/`
-  subdirectory, `age-of-sigmar/`, and `the-old-world/`.
-  A new vault contains 77 directories including its root and 34 `.gitkeep` files.
-  The tool creates zero-byte `.gitkeep` files
-  in empty subdirectories below `notes/` and in the empty
-  `attachments/notes/profiles/hinge/` directory. It reports directory and
-  `.gitkeep` outcomes separately, refuses to follow directory links or
-  Windows reparse points in managed directories or their ancestors, and does
-  not manage system directories such as `.githooks/`, `.github/`,
-  `.GitHub/`, or `.obsidian/`.
+  elsewhere. The built-in list covers the 97 user directories in the
+  reference vault snapshot. It includes notes for Docker, GTD, medical
+  topics, Obsidian, WSL, and watchlists, and attachment paths for archived
+  content, Docker, health, Warhammer 40,000, and Hinge. Template categories
+  are declared under `templates/notes/`. Generic templates remain in
+  `templates/`. See the [complete directory guide](../scripts/README.md).
+  A new vault contains 98 directories including its root and 40 zero-byte
+  `.gitkeep` files, one in each of the 39 leaf directories under `notes/` and
+  one in `attachments/notes/profiles/hinge/`. The tool places placeholders in
+  empty subdirectories under `notes/` and in the empty Hinge directory, the
+  sole attachment directory covered by this rule. It preserves existing
+  markers, including any legacy `notes/system/windows/.gitkeep`. It reports
+  directory and `.gitkeep` outcomes separately and rejects directory links
+  and Windows reparse points in managed directories or their ancestors.
+  The snapshot excludes `.git/`, `.githooks/`, `.github/`, and `.obsidian/`,
+  along with note, template, and attachment files.
   Simulation and execution share a complete preflight before any creation;
   later write failures report potentially partial initialization without
   rollback. No write access is required when there are no planned creations.
