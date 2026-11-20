@@ -7,6 +7,7 @@ import argparse
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -274,7 +275,7 @@ def run_backup(
     source = resolve_directory(
         source_directory,
         "Source directory",
-        reject_symlink=True,
+        reject_source_links=True,
     )
     target = resolve_directory(target_directory, "Target directory")
     validate_source_tree(source)
@@ -313,7 +314,12 @@ def run_backup(
         staging_parent = Path(staging_parent_name)
         staged_source = staging_parent / source.name
         logger.debug(f"Copying source tree to staging directory: {staged_source}")
-        shutil.copytree(source, staged_source, copy_function=shutil.copy2)
+        shutil.copytree(
+            source,
+            staged_source,
+            copy_function=shutil.copy2,
+            ignore=validate_copy_entries,
+        )
         logger.info(f"Staged source directory: {staged_source}")
 
         if resolve_git_identity(source) != (backup_head, backup_tag):
@@ -329,28 +335,55 @@ def run_backup(
 def resolve_directory(
     directory: Path,
     label: str,
-    reject_symlink: bool = False,
+    reject_source_links: bool = False,
 ) -> Path:
     expanded_directory = directory.expanduser()
-    if not expanded_directory.exists():
+    if reject_source_links:
+        absolute_directory = expanded_directory.absolute()
+        try:
+            for component in (
+                *reversed(absolute_directory.parents),
+                absolute_directory,
+            ):
+                status = source_entry_status(component, f"{label} must not be")
+                if not stat.S_ISDIR(status.st_mode):
+                    raise BackupError(f"{label} is not a directory: {component}")
+        except FileNotFoundError:
+            raise BackupError(f"{label} does not exist: {expanded_directory}") from None
+    elif not expanded_directory.exists():
         raise BackupError(f"{label} does not exist: {expanded_directory}")
-    if reject_symlink and expanded_directory.is_symlink():
-        raise BackupError(f"{label} must not be a symbolic link: {expanded_directory}")
-    if not expanded_directory.is_dir():
+    elif not expanded_directory.is_dir():
         raise BackupError(f"{label} is not a directory: {expanded_directory}")
     return expanded_directory.resolve(strict=True)
 
 
-def validate_source_tree(source: Path) -> None:
-    if source.is_symlink():
-        raise BackupError(f"Source directory must not be a symbolic link: {source}")
+def source_entry_status(path: Path, label: str) -> os.stat_result:
+    status = path.lstat()
+    if stat.S_ISLNK(status.st_mode):
+        raise BackupError(f"{label} a symbolic link: {path}")
+    attributes = getattr(status, "st_file_attributes", 0)
+    if attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
+        raise BackupError(f"{label} a Windows reparse point: {path}")
+    return status
 
-    for root_name, directory_names, file_names in os.walk(source):
-        root = Path(root_name)
-        for entry_name in [*directory_names, *file_names]:
-            entry = root / entry_name
-            if entry.is_symlink():
-                raise BackupError(f"Source tree contains a symbolic link: {entry}")
+
+def validate_copy_entries(directory: str, names: list[str]) -> tuple[str, ...]:
+    """Reject redirects before copying any of the listed entries."""
+    root = Path(directory)
+    source_entry_status(root, "Source tree contains")
+    for name in names:
+        source_entry_status(root / name, "Source tree contains")
+    return ()
+
+
+def raise_walk_error(error: OSError) -> Never:
+    raise error
+
+
+def validate_source_tree(source: Path) -> None:
+    source_entry_status(source, "Source directory must not be")
+    for root, directories, files in os.walk(source, onerror=raise_walk_error):
+        validate_copy_entries(root, [*directories, *files])
 
 
 def validate_target_location(source: Path, target: Path) -> None:

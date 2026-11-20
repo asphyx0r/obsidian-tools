@@ -41,9 +41,10 @@ python tools/backup-target-directory.py \
   /path/to/backups
 ```
 
-The target and optional staging parent must remain outside the source. The
-tool rejects symbolic links, existing output archives, invalid Git metadata,
-and paths that would make the copy recursive.
+The source path and its contents must be free of symbolic links and Windows
+reparse points. The target and optional staging parent must remain outside the
+source. The tool rejects existing output archives, invalid Git metadata, and
+paths that would make the copy recursive.
 
 ## `git-init.sh` and `git-init.ps1`
 
