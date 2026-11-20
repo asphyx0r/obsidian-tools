@@ -603,8 +603,9 @@ optional, deferred, or explicitly excluded from this repository.
 - Usage: Run with an existing source and external target directory; use
   `--dry-run` before creating the archive.
 - Notes: Uses only the Python standard library, includes `.git` and all files
-  present during staging, rejects symbolic links, and accepts an optional
-  staging parent. The archive name contains the captured 12-character `HEAD`
+  present during staging, and accepts an optional staging parent. It rejects
+  symbolic links and Windows reparse points in the source path and contents.
+  The archive name contains the captured 12-character `HEAD`
   and only a SemVer tag that points to that commit. The copy is not
   transactional and does not preserve every NTFS metadata class or add a
   cryptographic manifest.

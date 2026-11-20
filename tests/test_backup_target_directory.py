@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -11,6 +12,7 @@ import zipfile
 from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 from unittest import mock
 
 SCRIPT_PATH = (
@@ -22,7 +24,9 @@ TEMPORARY_DIRECTORY_CLEANUP_RETRY_DELAY_SECONDS = 0.01
 
 
 def load_script_module():
-    spec = importlib.util.spec_from_file_location("backup_target_directory", SCRIPT_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "backup_target_directory", SCRIPT_PATH
+    )
     module = importlib.util.module_from_spec(spec)
     if spec.loader is None:
         raise RuntimeError("Unable to load backup-target-directory.py.")
@@ -319,8 +323,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
             self.assertIn("[INFO ] Using source directory:", output)
             self.assertIn("[INFO ] Using target directory:", output)
             self.assertIn(
-                "source-with-spaces-20260718-125229-"
-                "000000000000-v0.0.0.zip",
+                "source-with-spaces-20260718-125229-000000000000-v0.0.0.zip",
                 output,
             )
             self.assertIn("[INFO ] Dry run completed without modifying data.", output)
@@ -379,10 +382,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
             target.mkdir()
             buffer_directory.mkdir()
 
-            archive_path = (
-                target
-                / "source-20260718-125229-ac42ebea5d4a-v1.0.0.zip"
-            )
+            archive_path = target / "source-20260718-125229-ac42ebea5d4a-v1.0.0.zip"
             archive_path.write_bytes(b"existing archive")
 
             with mock.patch.object(
@@ -432,6 +432,110 @@ class BackupTargetDirectoryTest(unittest.TestCase):
                 "Source tree contains a symbolic link",
             ):
                 self.script.validate_source_tree(source)
+
+    def test_source_reparse_points_are_rejected_before_staging(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            base = Path(temp_dir).resolve()
+            ancestor = base / "parent"
+            source = ancestor / "source"
+            nested = source / "nested"
+            nested.mkdir(parents=True)
+            target = base / "target"
+            target.mkdir()
+            real_lstat = Path.lstat
+
+            for flagged in (ancestor, source, nested):
+                with self.subTest(flagged=flagged):
+
+                    def read_status(path):
+                        status = real_lstat(path)
+                        if path == flagged:
+                            return SimpleNamespace(
+                                st_mode=status.st_mode,
+                                st_file_attributes=stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                            )
+                        return status
+
+                    with (
+                        mock.patch.object(Path, "lstat", read_status),
+                        mock.patch.object(
+                            self.script, "_is_linux_root", return_value=False
+                        ),
+                        mock.patch.object(self.script.shutil, "copytree") as copy,
+                        mock.patch.object(self.script, "create_archive") as archive,
+                        self.assertRaisesRegex(
+                            self.script.BackupError, "Windows reparse point"
+                        ),
+                    ):
+                        self.script.run_backup(
+                            source,
+                            target,
+                            base,
+                            False,
+                            self.script.Logger(False, io.StringIO()),
+                        )
+                    copy.assert_not_called()
+                    archive.assert_not_called()
+                    self.assertEqual(list(target.iterdir()), [])
+
+    def test_reparse_point_reported_during_copy_aborts_backup(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            base = Path(temp_dir).resolve()
+            source = base / "source"
+            source.mkdir()
+            entry = source / "data.txt"
+            entry.write_bytes(b"ordinary data")
+            target = base / "target"
+            target.mkdir()
+            real_lstat = Path.lstat
+            reads = 0
+
+            def read_status(path):
+                nonlocal reads
+                status = real_lstat(path)
+                if path == entry:
+                    reads += 1
+                    if reads > 1:
+                        return SimpleNamespace(
+                            st_mode=status.st_mode,
+                            st_file_attributes=stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                        )
+                return status
+
+            with (
+                mock.patch.object(Path, "lstat", read_status),
+                mock.patch.object(self.script, "_is_linux_root", return_value=False),
+                mock.patch.object(self.script, "create_archive") as archive,
+                self.assertRaisesRegex(
+                    self.script.BackupError, "Windows reparse point"
+                ),
+            ):
+                self.script.run_backup(
+                    source,
+                    target,
+                    base,
+                    False,
+                    self.script.Logger(False, io.StringIO()),
+                )
+            archive.assert_not_called()
+            self.assertEqual(
+                sorted(path.name for path in base.iterdir()), ["source", "target"]
+            )
+            self.assertEqual(list(target.iterdir()), [])
+
+    def test_source_walk_error_is_propagated(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+
+            def fail_to_walk(_source, *, onerror=None):
+                if onerror is not None:
+                    onerror(PermissionError("cannot scan source"))
+                return ()
+
+            with (
+                mock.patch.object(self.script.os, "walk", fail_to_walk),
+                self.assertRaisesRegex(PermissionError, "cannot scan source"),
+            ):
+                self.script.validate_source_tree(Path(temp_dir).resolve())
 
     def test_staging_is_cleaned_when_archive_creation_fails(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -567,9 +671,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
                         )
 
             archive_path = (
-                target
-                / "source-project-20260718-125229-"
-                "ac42ebea5d4a-v1.0.0.zip"
+                target / "source-project-20260718-125229-ac42ebea5d4a-v1.0.0.zip"
             )
             self.assertTrue(archive_path.is_file())
             with zipfile.ZipFile(archive_path) as archive:
@@ -629,10 +731,7 @@ class BackupTargetDirectoryTest(unittest.TestCase):
                         self.script.Logger(False, io.StringIO()),
                     )
 
-            archive_path = (
-                target
-                / f"repository-20260718-125229-{head}-v1.2.3.zip"
-            )
+            archive_path = target / f"repository-20260718-125229-{head}-v1.2.3.zip"
             self.assertTrue(archive_path.is_file())
             with zipfile.ZipFile(archive_path) as archive:
                 self.assertIsNone(archive.testzip())
