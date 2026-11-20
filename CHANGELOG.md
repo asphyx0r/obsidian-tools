@@ -2,6 +2,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## v3.0.1
+
+| References | Description | Author(s) |
+| --- | --- | --- |
+| 8f3f7bc | fix(tools): complete vault directory coverage | asphyx |
+| 0c0e446 | fix(tools): reject backup reparse points | asphyx |
+
 ## v3.0.0
 
 | References | Description | Author(s) |
